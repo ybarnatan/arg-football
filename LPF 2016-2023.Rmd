@@ -1,0 +1,696 @@
+---
+title: "Argentinean League Football Analysis (2016-2022)"
+sub-title: "EDA + statistical modelling"
+output: github_document
+---
+
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Import libraries
+```{r}
+library(ggplot2)
+library(readxl)
+library(dplyr)
+library(readr)
+library(viridis)
+library(skellam)
+
+pathBase = dirname(rstudioapi::getSourceEditorContext()$path)
+partidos <- read_csv(paste0(pathBase,"/partidos.csv"))
+```
+
+# Aesthethic variables
+```{r}
+colores = c(
+    '2016-2017' ='yellow',
+    '2017-2018' = "green",
+    '2018-2019' = "orange",
+    '2019-2020' = 'pink',
+    '2021' = 'magenta',
+    '2022' = "red")
+
+
+fuentes_customizadas = list( theme(
+                text = element_text(size=14, color = "black"),
+                axis.text.x = element_text(face="plain",size = 14, color="black"),
+                axis.text.y = element_text(face="plain", size = 14, color="black"),
+                plot.title = element_text(size = 14, face = "bold"),
+                legend.position = "none",
+                legend.key.size = unit(0.5, 'cm'),
+                panel.grid.major = element_blank(), 
+                panel.grid.minor = element_blank(),
+                panel.background = element_blank(), 
+                axis.line = element_line(colour = "black")), 
+                labs(fill = ""))
+
+```
+
+
+# Data Wrangling
+```{r}
+partidos <- na.omit(partidos)
+summary(partidos)
+
+partidos$goles_total = partidos$local_goles + partidos$visitante_goles
+```
+
+
+# EDA: SEASON-WISE ANALYSIS 
+
+The first thing to evaluate is how many goals were scored per season. We can conclude from this simple analysis that the 2016-17 season had the highest number of goals scored while the 2019-20 (probably due to the suspension of lots of matches due to the COVID-19 pandemic) was the poorest one.
+
+## 1.- Total goals per season
+```{r,  warning=FALSE, message=FALSE, error=FALSE }
+goles_tot = partidos %>% group_by(temporada) %>% 
+    dplyr::summarise(n_goles_total = sum(goles_total))
+
+GOLES.TOTALES = ggplot(goles_tot , aes(x=temporada, y=n_goles_total, fill=temporada, color=temporada)) + 
+    geom_bar(stat = "identity", width=0.8) +
+    fuentes_customizadas +
+    scale_fill_manual(values =colores ) +
+    xlab("Season")+
+    ylab("Total goals")+
+    ggtitle("Total goals per season") +
+    labs(fill = "")
+```
+
+
+```{r, fig.align = 'center', fig.width=6, fig.height=4}
+
+GOLES.TOTALES
+
+```
+
+
+## 2.- Goals per season - Home vs Away
+
+The following back-to-back plot allows a comparison per season of the number of goals scored by the home and away teams. At a qualitatively level, we can see that the home team tends to score more goals that the away team.
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+#-----------------
+#Data Wrangling
+#-----------------
+goles_local = partidos %>% group_by(temporada) %>% 
+    dplyr::summarise(n_goles_local = sum(local_goles))
+
+goles_visitante = partidos %>% group_by(temporada) %>% 
+    dplyr::summarise(n_goles_visitante = sum(visitante_goles))
+
+goles = merge(goles_local, goles_visitante, by='temporada')
+goles$temporada = as.factor(goles$temporada)
+
+goles_long = reshape2::melt(goles, 
+                            value.name = "nro_goles",
+                            variable.name = "localia",
+                            id.vars=c("temporada")) 
+    mutate(nro_goles = ifelse(localia=='n_goles_visitante', -nro_goles, nro_goles)) 
+    
+
+temp_df <-
+    goles_df %>% 
+    filter(localia == "local") %>% 
+    arrange(nro_goles)
+the_order <- temp_df$temporada
+```
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+#-----------------
+# Plot
+#-----------------
+GOLES.LOCALIA <- ggplot(data = goles_df,
+                       aes(x = temporada, y = nro_goles , group = localia, fill = localia)) +
+    geom_bar(stat = "identity", width = 0.75) +
+    coord_flip() +
+    fuentes_customizadas +
+    scale_y_continuous(breaks = seq(-600, 700, 100), 
+                       labels = abs(seq(-600, 700, 100))) +
+    labs(x = "Season", y = "Goals", title = "") +
+        scale_fill_manual(values= c('n_goles_local'= "springgreen", 
+                                    'n_goles_visitante'= "steelblue"),
+                      labels = c("n_goles_local"= 'Home' , 'n_goles_visitante'='Away'),
+                      name="",
+                      breaks=c("n_goles_local", "n_goles_visitante")) +
+    theme(legend.position = 'bottom')
+```
+
+
+```{r, fig.align = 'center', fig.width=6, fig.height=4 }
+
+GOLES.LOCALIA  
+
+```
+
+
+## 3.- Heatmap: goals per week of the season
+
+This heatmap shows the number of goals scored by matchweek per season. We may get several insights from it:
++ The last matchweek in the last two seasons showed a whooping number of goals scored in comparison to the rest of the seasons.
++ Because of different formats applied to the Argentinean league, the length of the season was never kept constant. 
++ The 2019-20 season was, definitively, the shortest due to the pandemic.
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+heat_df = partidos %>%
+    group_by(temporada, semana) %>%
+    dplyr::summarise(goles = sum(goles_total))
+
+GOLES.X.SEMANA = ggplot(heat_df, aes(x = semana, y = temporada, fill = goles)) +
+    geom_tile(color = "white",lwd = 1.5, linetype = 1) + 
+    coord_fixed()+
+    theme_bw()+
+    geom_text(aes(label =  goles), color = "white", size = 4) +
+    scale_fill_gradient(low = "blue4", high = "green") +
+    ylab("Season")+
+    xlab("Matchweek")+
+    labs(fill = "Goals")
+```
+
+```{r, fig.align = 'center', fig.width=10, fig.height=4}
+
+GOLES.X.SEMANA
+
+```
+
+
+## 4.- Heatmap: goals per match of the season
+
+This heatmap shows the average number of goals scored per match, by matchweek per season. With these values we can see what is the expected (I use this term as the average, indistinctly) number of goals per match.
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+heat_mean = partidos %>%
+    group_by(temporada, semana) %>%
+    dplyr::summarise(goles_media = round(mean(goles_total),1))
+
+
+GOLES.X.PARTIDO = ggplot(heat_mean, aes(x = semana, y = temporada, fill = goles_media)) +
+    geom_tile(color = "white",lwd = 1.5, linetype = 1) + 
+    coord_fixed()+
+    theme_bw()+
+    geom_text(aes(label =  goles_media), color = "white", size = 4) +
+    scale_fill_gradient(low = "blue4", high = "green") +
+    ylab("Season")+
+    xlab("Matchweek")+
+    labs(fill = "Mean goals")
+```
+
+```{r, fig.align = 'center', fig.width=10, fig.height=4}
+
+GOLES.X.PARTIDO
+
+```
+
+
+## 5.- Goals scored as a function of the result of the match
+
+How many goals are scored by the teams, season wise, when they win, lose or the match results in a tie? Usually, the winning team scores more goals while hosting the match. 
+
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+localia = partidos %>% 
+    group_by(temporada, resultado) %>%
+    dplyr::summarise(total_count=n())
+
+localia$resultado <- factor(localia$resultado,
+                            levels=c('local', 'empate','visitante'))
+
+
+PARTIDOS.X.LOCALIA  = ggplot(data = localia, 
+                    aes(x=resultado, y=total_count, fill=total_count))+
+            geom_bar(stat='identity') +
+            facet_grid(temporada ~ . ) +
+            fuentes_customizadas + 
+            theme(axis.text.x = element_text(angle = 55, hjust = 1))+
+            ylab("Goals")+
+            xlab("Team")+
+            scale_fill_viridis(begin=0,end=1,direction=-1,discrete=FALSE,option='magma')+
+            scale_x_discrete( labels=c('local' = "Home",
+                                       'empate' = "Draw", 
+                                       'visitante'="Away"))
+```
+
+```{r, fig.align = 'center', fig.width=6, fig.height=10}
+
+PARTIDOS.X.LOCALIA 
+
+```
+
+
+
+#EDA: CLUB-WISE ANALYSIS
+
+## 1.- Goals per team
+
+The following plot depicts the number of goals scored by team and by season:
++ Boca Juniors, Racing Club and River Plate seem to be the teams that score the most, throughout the seasons analyzed.
++ There are teams missing in some seasons due to relegations (which, as the number of matches per season, constantly changed)
+
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+#-  * -  * -  * -  * 
+#DATA WRANGLING
+#-  * -  * -  * -  * 
+golesDeLocal = partidos %>%
+    group_by(temporada, local) %>%
+    dplyr::summarise(goles = sum( local_goles))
+colnames(golesDeLocal)[which(names(golesDeLocal) == 'local')] <- 'equipo'
+
+golesDeVisitante = partidos %>%
+    group_by(temporada, visitante) %>%
+    dplyr::summarise(goles = sum(visitante_goles))
+colnames(golesDeVisitante)[which(names(golesDeVisitante) == 'visitante')] <- 'equipo'
+
+goles_x_equipo =  merge( x = golesDeLocal, y = golesDeVisitante, by=c("temporada", "equipo"))
+goles_x_equipo$nGoles = goles_x_equipo$goles.x + goles_x_equipo$goles.y 
+
+#-  * -  * -  * -  * 
+#PLOT
+#-  * -  * -  * -  * 
+GOLES.X.EQ  = ggplot(data = goles_x_equipo, aes(x=equipo, y=nGoles, fill=nGoles, color='black')) +
+            geom_bar(stat='identity') +
+            facet_grid(temporada ~ . ) +
+            fuentes_customizadas+        
+            theme(axis.text.x = element_text(angle = 55, hjust = 1))+
+            ylab("Goals")+
+            xlab("Team")+
+            scale_fill_viridis(begin=0,end=1,direction=-1,discrete=FALSE,option='magma')
+```
+
+
+```{r, fig.align = 'center', fig.width=8, fig.height=10}
+
+GOLES.X.EQ  
+
+```
+
+
+
+## 2.- Cards per team 
+
+Are there teams that are booked more than others? 
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+
+#----------------
+# Data Wrangling
+#----------------
+
+#-----> Local
+tarjetas_local = partidos %>%  group_by(temporada, local) %>% 
+    dplyr::summarise(amarillas = sum(local_amarillas),
+              rojas = sum(local_rojas))
+colnames(tarjetas_local)[which(names(tarjetas_local) == 'local')] <- 'equipo'
+
+##-----> Visitante
+tarjetas_visitante = partidos %>%  group_by(temporada, visitante) %>% 
+    dplyr::summarise(amarillas = sum(visitante_amarillas),
+              rojas = sum(visitante_rojas))
+colnames(tarjetas_visitante)[which(names(tarjetas_visitante) == 'visitante')] <- 'equipo'
+
+##----->  Mergeo y sumo todas las tarjetas
+tarj = merge(x=tarjetas_local, y=tarjetas_visitante, by=c('temporada', 'equipo'))
+tarj$equipo = as.factor(tarj$equipo)
+tarj$amarillas = tarj$amarillas.x + tarj$amarillas.y
+tarj$rojas = tarj$rojas.x + tarj$rojas.y
+
+
+AMARILLAS.X.EQ = ggplot(data = tarj, 
+                    aes(x=equipo, y=amarillas, fill=amarillas))+
+            geom_bar(stat='identity') +
+            facet_grid(temporada ~ . ) +
+            fuentes_customizadas+ 
+            theme(axis.text.x = element_text(angle = 55, hjust = 1))+
+            ylab("Number of yellow cards")+
+            xlab("Team")+
+            ggtitle("Number of yellow cards per team")+
+            scale_fill_viridis(begin=0,end=1,direction=-1,discrete=FALSE,option='viridis')
+
+ROJAS.X.EQ = ggplot(data = tarj, 
+                    aes(x=equipo, y=rojas, fill=rojas))+
+            geom_bar(stat='identity') +
+            facet_grid(temporada ~ . ) +
+            fuentes_customizadas+ 
+            theme(axis.text.x = element_text(angle = 55, hjust = 1))+
+            ylab("Number of red cards")+
+            xlab("Team")+
+            ggtitle("Number of red cards per team")+
+            scale_fill_viridis(begin=0,end=1,direction=-1,discrete=FALSE,option='viridis')
+```
+
+```{r, fig.align = 'center', fig.width=8, fig.height=10}
+AMARILLAS.X.EQ
+```
+
+```{r, fig.align = 'center', fig.width=8, fig.height=10}
+ROJAS.X.EQ
+```
+
+## 3.-  Referee's cards performance
+
+Are there more/less strict referees in terms of bookings?
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+
+#----------------
+# Data Wrangling
+#----------------
+arbitros = partidos %>% group_by(temporada, arbitro) %>%  
+    dplyr::summarise(ama_al_local = sum(local_amarillas),
+              ama_al_visitante = sum(visitante_amarillas),
+              roja_al_local = sum(local_rojas),
+              roja_al_visitante = sum(visitante_rojas))
+
+arbitros$amarillas_totales = arbitros$ama_al_local + arbitros$ama_al_visitante
+arbitros$rojas_totales = arbitros$roja_al_local + arbitros$roja_al_visitante
+
+ama_df <-
+    arbitros %>% 
+    arrange(amarillas_totales)
+
+roja_df <-
+    arbitros %>% 
+    arrange(rojas_totales)
+
+
+#-***-***-***-***
+# PLOT
+#-***-***-***-***
+
+ARBITROS_AMA  <- ggplot(data = ama_df,
+                       aes(x =arbitro, y = amarillas_totales, fill =amarillas_totales)) +
+    geom_bar(stat = "identity", width = 0.75) +
+    coord_flip() + fuentes_customizadas+ 
+    scale_fill_viridis(begin=0,end=1,direction=-1,discrete=FALSE,option='viridis')+
+    labs(x = "Season", y = "Number of yellow cards", title = "") +
+    facet_grid(.~temporada)
+
+
+
+ARBITROS_ROJA <- ggplot(data = roja_df,
+                       aes(x =arbitro, y = rojas_totales, fill = rojas_totales)) +
+    geom_bar(stat = "identity", width = 0.75) +
+    coord_flip() + fuentes_customizadas+ 
+    scale_fill_viridis(begin=0,end=1,direction=-1,discrete=FALSE,option='viridis')+
+    labs(x = "Season", y = "Number of red cards", title = "") +
+    facet_grid(.~temporada)
+```
+
+```{r, fig.align = 'center', fig.width=8, fig.height=10}
+ARBITROS_AMA
+```
+
+```{r, fig.align = 'center', fig.width=8, fig.height=10}
+ARBITROS_ROJA
+```
+
+
+# PREDICTING RESULTS WITH STATISTICAL MODELLING
+
+We're going to use the last season available for the most updated data. To performe predictions, we'll apply the most basic distribution for discrete numbers (number of goals), that is, the Poisson distribution.
+
+Such distribution assumes:
++ The probability of an event occurring in a given time interval does not vary with time
++ The events occur at random
++ The events occur independently
+
+and has only one parameter, lambda, which is the average number events per period of time. In terms of our study case, lambda will represent the average number of goals scored per 90-min match.
+
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+
+data = partidos %>% filter(temporada == '2022')
+data = data[c('local', 'visitante', 'semana', 'local_goles', 'visitante_goles')]
+HOME.AVG = mean(data$local_goles) 
+AWAY.AVG = mean(data$visitante_goles)
+```
+
+We can directly calculate the average number of goals in the desired season, so that the home team scores in average `{r} round(HOME.AVG,2)` while the away team scores `{r} round(AWAY.AVG, 2)`
+
+
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+#----------------
+# Data Wrangling
+#----------------
+
+#Convierto wide a long para la condicion de local/visitante
+data_temp = reshape2::melt(data, direction = 'long',
+                          value.name = 'equipo',
+                          variable.name = "condicion",
+                          id.vars=c("semana", "local_goles", 'visitante_goles')) #id.vars = variables to keep, otherwise converted to long format
+
+#Tuneo locales y visitantes
+data_temp_local = data_temp %>% filter(condicion =='local')
+data_temp_local = data_temp_local[,c("semana", 'local_goles','condicion','equipo' )]
+colnames(data_temp_local)[which(names(data_temp_local) == 'local_goles')] <- 'n_goles'
+
+
+data_temp_vis = data_temp %>% filter(condicion =='visitante')
+data_temp_vis = data_temp_vis[,c("semana", 'visitante_goles','condicion','equipo' )]
+colnames(data_temp_vis)[which(names(data_temp_vis) == 'visitante_goles')] <- 'n_goles'
+
+
+data_long = rbind(data_temp_local, data_temp_vis)
+
+```
+
+
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+#----------------
+# Data Wrangling
+#----------------
+
+prop_obs_local = data_long %>% 
+    filter(condicion=='local') %>% 
+    group_by(n_goles) %>% 
+   dplyr::summarise(prop_goles=n()/nrow(.))  
+prop_obs_local$observacion = 'observada'
+prop_obs_local$condicion = 'local'
+
+prop_obs_vis = data_long %>% 
+    filter(condicion=='visitante') %>% 
+    group_by(n_goles) %>% 
+    dplyr::summarise(prop_goles=n()/nrow(.))  
+prop_obs_vis$observacion = 'observada'
+prop_obs_vis$condicion = 'visitante'
+
+dpois_obs = rbind(prop_obs_local, prop_obs_vis)
+
+prop_est_local = data.frame(
+    prop_goles = dpois(0:max(data_long$n_goles),mean(data$local_goles)),
+    n_goles = seq(0,max(data_long$n_goles, by=1)))
+prop_est_local$observacion = 'estimada'
+prop_est_local$condicion = 'local'
+
+prop_est_vis = data.frame(
+    prop_goles = dpois(0:max(data_long$n_goles), mean(data$visitante_goles)),
+    n_goles = seq(0,max(data_long$n_goles, by=1)))
+prop_est_vis$observacion = 'estimada'
+prop_est_vis$condicion = 'visitante'
+
+dpois_est = rbind(prop_est_local, prop_est_vis)
+```
+
+# 1.- Number of goals per match (observed vs. expected)
+
+The plot below shows the proportion of matches where goals were scored by the home and the away team (observed, bars), while also showing the estimated by the corresponding Poisson distributions using thee average goals as before (estimated, lines).
+
++ From the observed distributions, the away team seem to have a much higher proportion of matches without scoring any goals, and that number is greater than for the home team.
++ For scoring one goal, the proportion is similar, while the trend shows a much higher proportion of matches where the home team scored 2 to 5 goals in comparison with the away team. 
++ The fitted model does not seem to deviate greatly from the actual seen numbers. 
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+#----------------
+# PLOT
+#----------------
+DISTRIB.POI = 
+    ggplot() +
+    geom_bar(data = dpois_obs, 
+             aes(x = n_goles, y = prop_goles, fill=condicion, color=condicion),
+             stat = "identity", position='dodge',  width=0.8) +
+        scale_fill_manual(values= c('local'= "springgreen", 
+                                    'visitante'= "steelblue"),
+                      labels = c("local"= 'Home (obs.)' , 'visitante'='Away (obs.)'),
+                      name=""
+                      ) +
+        fuentes_customizadas+ 
+    xlab("Number of goals per match")+
+    ylab("Proportion of matches")+
+    ggtitle("Observed and expected number of goals scored per team")+
+    scale_x_continuous(breaks=0:5, labels=0:5) +
+    theme(legend.position = 'bottom')+
+    labs(fill = "Condition")
+
+
+DISTRIB.POI = DISTRIB.POI  + 
+    geom_line(data=dpois_est, aes(x=n_goles, y=prop_goles, 
+                                 color = condicion), linewidth = 1.4) +
+    scale_color_manual(values= c('local'= "red", 
+                                    'visitante'= "blue"),
+                      labels = c("local"= 'Home (est.)', 
+                                 'visitante'='Away (est.)'),
+                      name="") +
+    geom_point(data = dpois_est, 
+               aes(x = n_goles, y = prop_goles), color='black', size=2) +
+    labs(fill = "Condition")
+```
+
+
+```{r, fig.align = 'center', fig.width=6, fig.height=4}
+DISTRIB.POI 
+```
+
+
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+specific.val = ppois(q=1, lambda= mean(data$local_goles), lower.tail=FALSE)
+```
+
+We can go a step further with the simple Poisson model, estimating the probability of specific events. For example, what is the probability of the h ome team scoring 2 or more goals? we're asking for P(>= 2  /  Home team), which is `{r} specific.val`.
+ 
+
+
+# 2.- Difference goal result: Skellam distribution + most probable scenarios
+
+What about draws? for this, we need to know when the difference between the home and away team Poisson distributions is 0. The distribution that results from substracting one Poisson from is called a Skellam distribution.
+
+```{r, warning=FALSE, message=FALSE, error=FALSE }
+data$gol_diff = data$local_goles - data$visitante_goles #Genero la columna gol_dif
+
+diff_gol = data %>% group_by(gol_diff) %>%
+    dplyr::summarize(prop_goles_obs=n()/nrow(.)) %>%
+     inner_join(data.frame(gol_diff=-4:5,
+                prop_goles_estimado=skellam::dskellam(-4:5,mean(data$local_goles),
+                mean(data$visitante_goles))),by=c("gol_diff"))
+
+SKELLAM.DISTRIB = 
+    ggplot() +
+    geom_bar(data = diff_gol, 
+             aes(x = gol_diff, y = prop_goles_obs, fill='red', color='red'),
+             stat = "identity",  width=0.8) +
+        fuentes_customizadas+
+    theme(legend.position='none') + 
+    xlab("Number of goals difference (Home - Away team)")+
+    ylab("Proportion of matches")+
+    ggtitle("Skellam distribution for Home-Away results")
+    scale_x_continuous(breaks=-4:5, labels=-4:5)
+
+SKELLAM.DISTRIB = SKELLAM.DISTRIB +
+    geom_line(data=diff_gol, aes(x = gol_diff, y = prop_goles_obs)) + 
+    geom_point(data=diff_gol, aes(x = gol_diff, y = prop_goles_obs))
+```
+
+```{r, fig.align = 'center', fig.width=6, fig.height=4}
+SKELLAM.DISTRIB 
+```
+
+
+# 3.- Build a model
+
+Finally, lets build a GLM model with which we can make some specific analysis on the participating teams. 
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+df_model =  rbind(
+            data.frame(n_goles = partidos$local_goles,
+                       equipo = partidos$local,
+                       oponente = partidos$visitante,
+                       localia = 1),
+            data.frame(n_goles = partidos$visitante_goles,
+                       equipo = partidos$visitante,
+                       oponente = partidos$local,
+                       localia = 0))
+ 
+poi_model = glm(n_goles ~ equipo + oponente + localia,
+                family=poisson(link=log),data=df_model)
+
+nPartidos = partidos %>%
+    filter(temporada=='2022') %>%
+    dplyr::summarise(nPartidos = max(semana))
+
+```
+
+
+Note that if we apply this model to a small sample size (lets say when the season is going through the 8th matchweek, where each team in the season would've played `{r} nPartidos` matches), the accuracy of this approximation can vary significantly.
+
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+#knitr::kable(summary(poi_model), caption = "Summary table for")
+summary(poi_model)
+```
+
+To make our analysis, bear in mind that the results are displayed in the log scale, so we have to calculate e^estimate i. Does the home factor weights? yes! since e^0.25  = 1.28. 
+
+Then we can analyze the performance of each team, using the "equipo" values. Positive values mean that the team scores more than average and negative, the opposite. For example:
++ For River Plate: e^0.78 = 2.18 [River Plate scores 2.18 goals more than the average team]
++ For Quilmes: e^-0.3  = 0.74 [Quilmes scores 0.74 goals than the average team]
+
+Finally, the "oponente" values penalize/reward teams based on the quality of their opposition. This mimics the defensive strength of each team
++ For San Lorenzo, e^-0.26 = 0.77
++ For River plate, e^-0.5 = 0.61
+In other words, if you're playing these teams, you're less likely to score against River plate than San Lorenzo.
+
+If we plot the "equipo" and the "oponente" estimates per team, separatedly, we can get a peek of which team has the most probability of score above/below average , and which is the most/least defensive (i terms of average goals received).
+
+
+```{r,warning=FALSE, message=FALSE, error=FALSE }
+#----------------
+# Data Wrangling
+#----------------
+df=data.frame(summary(poi_model)$coefficients)
+df<- cbind(newColName = rownames(df), df)
+rownames(df) <- 1:nrow(df)
+colnames(df) = c("equipo", 'estimate', 'std_error','z_value','p_value')
+
+potenciales_goles = df %>% dplyr::filter(stringr::str_detect(equipo, 'equipo'))
+potenciales_goles$estimate_lineal = exp(potenciales_goles$estimate)
+potenciales_goles$equipo <- stringr::str_replace(potenciales_goles$equipo , "equipo", "")
+
+
+POTENCIAL.GOLES =  ggplot(potenciales_goles, 
+                          aes(x = reorder(equipo, estimate_lineal),
+                              y = estimate_lineal, 
+                              color=estimate_lineal,
+                              fill=estimate_lineal)) +
+                   geom_bar(stat = "identity", width = 0.75) +
+    coord_flip() +
+    fuentes_customizadas +
+    ylab("Goals scored relative to average (GLM Poi model estimates)")+
+    xlab("Team")+
+    ggtitle("Offensive estimation per team by GLM Poi") +
+    labs(fill = "")+
+    scale_fill_gradient(low = "blue4", high = "green")
+```
+
+```{r, fig.align = 'center', fig.width=6, fig.height=8}
+POTENCIAL.GOLES
+```
+
+```{r, warning=FALSE, message=FALSE, error=FALSE}
+poder_defensivo = df %>% dplyr::filter(stringr::str_detect(equipo, 'oponente'))
+poder_defensivo$estimate_lineal = exp(poder_defensivo$estimate)
+poder_defensivo$equipo <- stringr::str_replace(poder_defensivo$equipo , "oponente", "")
+
+POTENCIA.DEF =  ggplot(poder_defensivo, 
+                          aes(x = reorder(equipo, estimate_lineal),
+                              y = estimate_lineal, 
+                              color=estimate_lineal,
+                              fill=estimate_lineal)) +
+                   geom_bar(stat = "identity", width = 0.75) +
+    coord_flip() +
+    fuentes_customizadas +
+    ylab("Deffensive strength (GLM Poi model estimates)")+
+    xlab("Team")+
+    ggtitle("Deffensive estimation per team by GLM Poi") +
+    labs(fill = "")+
+    scale_fill_gradient(low = "blue4", high = "green")
+```
+
+
+```{r, fig.align = 'center', fig.width=6, fig.height=8}
+POTENCIA.DEF
+```
+
+
+
