@@ -121,25 +121,6 @@ match.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
-## 5.- Goals scored as a function of the result of the match
-
-How many goals are scored by the teams, season wise, when the winner was
-the home team, the away team or the match resulted in a tie? Usually,
-the host team scores more goals than the away one.
-
-``` r
-#-------------------
-#   Data processing
-#-------------------
-localia = partidos %>% 
-    group_by(temporada, resultado) %>%
-    dplyr::summarise(total_count=n())
-
-localia$resultado <- factor(localia$resultado,
-                            levels=c('local', 'empate','visitante'))
-```
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
 
 # **EDA: CLUB-WISE ANALYSIS**
 
