@@ -41,7 +41,7 @@ fuentes_customizadas = list( theme(
                 labs(fill = ""))
 ```
 
-# **EDA: SEASON-WISE ANALYSIS **
+#**EDA: SEASON-WISE ANALYSIS **
 
 The first thing to evaluate is how many goals were scored per season. We
 can conclude from this simple analysis that the 2016-17 season had the
@@ -141,7 +141,7 @@ localia$resultado <- factor(localia$resultado,
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
 
-# **EDA: CLUB-WISE ANALYSIS**
+#**EDA: CLUB-WISE ANALYSIS**
 
 ## 1.- Goals per team
 
@@ -211,7 +211,7 @@ roja_df <- arbitros %>%  arrange(rojas_totales)
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-26-1.png" style="display: block; margin: auto;" />
 
-# PREDICTING RESULTS WITH STATISTICAL MODELLING
+#**PREDICTING RESULTS WITH STATISTICAL MODELLING**
 
 We’re going to use the last season available for the most updated data.
 To performe predictions, we’ll apply the most basic distribution for
