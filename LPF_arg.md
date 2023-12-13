@@ -211,7 +211,7 @@ roja_df <- arbitros %>%  arrange(rojas_totales)
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-26-1.png" style="display: block; margin: auto;" />
 
-# **PREDICTING RESULTS WITH STATISTICAL MODELLING**
+# **PREDICTING RESULTS BY STATISTICAL MODELLING**
 
 We’re going to use the last season available for the most updated data.
 To performe predictions, we’ll apply the most basic distribution for
