@@ -216,46 +216,6 @@ GOLES.X.PARTIDO
 ```
 
 
-## 5.- Goals scored as a function of the result of the match
-
-How many goals are scored by the teams, season wise, when the winner was the home team, the away team or the match resulted in a tie? Usually, the host team scores more goals than the away one.
-
-
-```{r, warning=FALSE, message=FALSE}
-#-------------------
-#   Data processing
-#-------------------
-localia = partidos %>% 
-    group_by(temporada, resultado) %>%
-    dplyr::summarise(total_count=n())
-
-localia$resultado <- factor(localia$resultado,
-                            levels=c('local', 'empate','visitante'))
-```
-
-```{r, echo=FALSE}
-PARTIDOS.X.LOCALIA  = ggplot(data = localia, 
-                    aes(x=resultado, y=total_count, fill=total_count))+
-            geom_bar(stat='identity') +
-            facet_grid(temporada ~ . ) +
-            fuentes_customizadas + 
-            theme(axis.text.x = element_text(angle = 25, hjust = 1))+
-            ylab("Goals")+
-            xlab("Team")+
-            theme(strip.text.y = element_text(angle=0)) +
-            scale_fill_viridis(begin=0,end=1,direction=-1,discrete=FALSE,option='magma')+
-            scale_x_discrete( labels=c('local' = "Home",
-                                       'empate' = "Draw", 
-                                       'visitante'="Away")) +
-            ggtitle("Number of goals scored by the winning team based on the hosting/visiting condition")
-```
-
-
-```{r, echo=FALSE, fig.align = 'center', fig.width=10, fig.height=5}
-PARTIDOS.X.LOCALIA 
-```
-
-
 
 # **EDA: CLUB-WISE ANALYSIS**
 
