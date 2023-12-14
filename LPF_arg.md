@@ -143,11 +143,11 @@ probability of specific events. For example, what is the probability of
 the h ome team scoring 2 or more goals? we’re asking for
 $P( \ge 2 | Home)$, which is 0.3391023.
 
-## 3.- Difference goal result: Skellam distribution + most probable scenarios
+## 3.- Difference goal result: most probable scenarios
 
 What about draws? for this, we need to know when the difference between
 the home and away team Poisson distributions is 0. The distribution that
-results from substracting one Poisson from is called a Skellam
+results from subtracting one Poisson from another is called a Skellam
 distribution.
 
     ## <ScaleContinuousPosition>
@@ -156,115 +156,103 @@ distribution.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
 
-## 4.- Build a model
+With this plot we can see that for the Argentinean League, the most
+probable scenario is a 0-0 draw. Then, there is a higher probability of
+the home team winning by one goal and in third place, there is almost
+the same probability of the home team winning by two goals and the away
+team, winning by one goal.
+
+## 4.- Build a GLM odel
 
 Finally, lets build a GLM model with which we can make some specific
 analysis on the participating teams.
-
-``` r
-nPartidos = partidos %>%
-    filter(temporada=='2022') %>%
-    dplyr::summarise(nPartidos = max(semana))
-```
 
 Note that if we apply this model to a small sample size (lets say when
 the season is going through the 8th matchweek, where each team in the
 season would’ve played 27 matches), the accuracy of this approximation
 can vary significantly.
 
-``` r
-summary(poi_model)
-```
+|                              | Estimate | Std. Error | z value | Pr(\>\|z\|) |
+|:----------------------------:|:--------:|:----------:|:-------:|:-----------:|
+|       **(Intercept)**        | -0.1881  |   0.1276   | -1.474  |   0.1404    |
+|   **equipoArgentinos Jun**   |  0.304   |   0.1343   |  2.264  |   0.02355   |
+|      **equipoArsenal**       |  0.1878  |   0.1366   |  1.375  |   0.1692    |
+|      **equipoBanfield**      |  0.2638  |   0.1296   |  2.036  |   0.04171   |
+|  **equipoBarracas Central**  |  0.3174  |   0.2146   |  1.479  |   0.1393    |
+|      **equipoBelgrano**      | 0.03311  |   0.1605   | 0.2064  |   0.8365    |
+|    **equipoBoca Juniors**    |  0.7341  |   0.1197   |  6.133  |  8.649e-10  |
+|     **equipoCA Huracán**     |  0.3041  |   0.1286   |  2.364  |   0.01807   |
+|      **equipoCA Unión**      |  0.3249  |   0.1282   |  2.535  |   0.01124   |
+|     **equipoCC Córdoba**     |  0.4005  |   0.1502   |  2.667  |  0.007649   |
+|     **equipoChacarita**      |  0.1248  |   0.2321   | 0.5378  |   0.5907    |
+|    **equipoClub Olimpo**     |  0.1785  |   0.1721   |  1.037  |   0.2996    |
+|       **equipoColón**        |  0.2223  |   0.1307   |   1.7   |   0.08906   |
+|   **equipoDefensa y Just**   |  0.5032  |   0.1241   |  4.054  |  5.032e-05  |
+|    **equipoEstudiantes**     |  0.4226  |   0.1259   |  3.356  |  0.0007913  |
+|    **equipoGimnasia ELP**    |  0.217   |   0.1309   |  1.658  |   0.09741   |
+|     **equipoGodoy Cruz**     |  0.416   |   0.1262   |  3.297  |  0.0009765  |
+|   **equipoIndependiente**    |  0.4334  |   0.1259   |  3.442  |  0.0005766  |
+|       **equipoLanús**        |  0.411   |   0.1264   |  3.251  |  0.001149   |
+|    **equipoNewell’s OB**     |  0.3129  |   0.1283   |  2.438  |   0.01476   |
+|     **equipoPatronato**      |  0.2923  |   0.1291   |  2.264  |   0.02355   |
+|      **equipoPlatense**      |  0.3955  |   0.1661   |  2.38   |   0.0173    |
+|      **equipoQuilmes**       | -0.3063  |   0.2631   | -1.164  |   0.2444    |
+|    **equipoRacing Club**     |  0.6475  |   0.1214   |  5.334  |  9.595e-08  |
+|      **equipoRafaela**       |  0.2175  |   0.2119   |  1.026  |   0.3047    |
+|    **equipoRiver Plate**     |  0.7797  |   0.1191   |  6.549  |  5.806e-11  |
+|    **equipoRosario Cent**    |  0.4061  |   0.1264   |  3.212  |  0.001317   |
+|    **equipoSan Lorenzo**     |  0.4233  |   0.1259   |  3.362  |  0.0007748  |
+|     **equipoSan Martin**     |  0.3063  |   0.2245   |  1.364  |   0.1724    |
+|   **equipoSan Martín SJ**    |  0.2447  |   0.1517   |  1.613  |   0.1067    |
+|     **equipoSarmiento**      |  0.2297  |   0.1522   |  1.509  |   0.1312    |
+|      **equipoTalleres**      |  0.4537  |   0.1252   |  3.624  |  0.0002904  |
+|     **equipoTemperley**      |  0.1751  |   0.1721   |  1.017  |   0.3089    |
+|       **equipoTigre**        |  0.4992  |   0.1332   |  3.747  |  0.0001788  |
+|      **equipoTucumán**       |  0.3552  |   0.1276   |  2.783  |  0.005384   |
+|    **equipoVélez Sarsf**     |  0.4243  |   0.126    |  3.366  |  0.0007621  |
+|  **oponenteArgentinos Jun**  | -0.3875  |   0.1172   | -3.305  |  0.000949   |
+|     **oponenteArsenal**      | -0.05093 |   0.1058   | -0.4813 |   0.6303    |
+|     **oponenteBanfield**     | -0.3097  |   0.1081   | -2.865  |  0.004177   |
+| **oponenteBarracas Central** | -0.05098 |   0.1824   | -0.2794 |   0.7799    |
+|     **oponenteBelgrano**     | -0.3332  |   0.133    | -2.505  |   0.01226   |
+|   **oponenteBoca Juniors**   |  -0.61   |   0.1185   |  -5.15  |  2.61e-07   |
+|    **oponenteCA Huracán**    | -0.3713  |    0.11    | -3.375  |  0.0007387  |
+|     **oponenteCA Unión**     | -0.1916  |   0.1049   | -1.826  |   0.06785   |
+|    **oponenteCC Córdoba**    | -0.08974 |   0.1266   | -0.7089 |   0.4784    |
+|    **oponenteChacarita**     | 0.02771  |   0.1765   |  0.157  |   0.8753    |
+|   **oponenteClub Olimpo**    | 0.04052  |   0.1336   | 0.3032  |   0.7618    |
+|      **oponenteColón**       | -0.2176  |   0.1056   | -2.059  |   0.03945   |
+|  **oponenteDefensa y Just**  | -0.4345  |   0.1126   | -3.859  |  0.0001138  |
+|   **oponenteEstudiantes**    | -0.2758  |   0.1074   | -2.567  |   0.01025   |
+|   **oponenteGimnasia ELP**   | -0.2905  |   0.1076   |  -2.7   |  0.006939   |
+|    **oponenteGodoy Cruz**    | -0.1378  |   0.1037   | -1.329  |   0.1838    |
+|  **oponenteIndependiente**   | -0.4079  |   0.1117   | -3.652  |   0.00026   |
+|      **oponenteLanús**       | -0.07877 |   0.1023   | -0.7703 |   0.4411    |
+|   **oponenteNewell’s OB**    | -0.3374  |   0.109    | -3.094  |  0.001975   |
+|    **oponentePatronato**     | -0.1041  |   0.1027   | -1.014  |   0.3108    |
+|     **oponentePlatense**     | -0.2144  |   0.1498   | -1.431  |   0.1524    |
+|     **oponenteQuilmes**      | 0.03951  |   0.1697   | 0.2328  |   0.8159    |
+|   **oponenteRacing Club**    | -0.3575  |    0.11    | -3.249  |  0.001157   |
+|     **oponenteRafaela**      | -0.3001  |   0.1971   | -1.522  |   0.1279    |
+|   **oponenteRiver Plate**    | -0.4963  |   0.1145   | -4.333  |  1.472e-05  |
+|   **oponenteRosario Cent**   | -0.1282  |   0.1034   |  -1.24  |   0.2148    |
+|   **oponenteSan Lorenzo**    | -0.2645  |   0.1071   |  -2.47  |   0.01352   |
+|    **oponenteSan Martin**    | 0.05511  |   0.1804   | 0.3055  |    0.76     |
+|  **oponenteSan Martín SJ**   | -0.05336 |   0.1219   | -0.4379 |   0.6615    |
+|    **oponenteSarmiento**     |  0.0103  |   0.1191   | 0.08653 |    0.931    |
+|     **oponenteTalleres**     | -0.3354  |   0.1092   |  -3.07  |  0.002143   |
+|    **oponenteTemperley**     | 0.04618  |   0.1337   | 0.3455  |   0.7297    |
+|      **oponenteTigre**       | -0.02758 |   0.1111   | -0.2483 |   0.8039    |
+|     **oponenteTucumán**      | -0.1626  |   0.1045   | -1.557  |   0.1196    |
+|   **oponenteVélez Sarsf**    | -0.3045  |   0.1083   | -2.811  |   0.00494   |
+|         **localia**          |  0.2534  |  0.02938   |  8.623  |  6.504e-18  |
 
-    ## 
-    ## Call:
-    ## glm(formula = n_goles ~ equipo + oponente + localia, family = poisson(link = log), 
-    ##     data = df_model)
-    ## 
-    ## Coefficients:
-    ##                          Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept)              -0.18807    0.12758  -1.474 0.140445    
-    ## equipoArgentinos Jun      0.30402    0.13426   2.264 0.023552 *  
-    ## equipoArsenal             0.18784    0.13664   1.375 0.169234    
-    ## equipoBanfield            0.26381    0.12955   2.036 0.041711 *  
-    ## equipoBarracas Central    0.31736    0.21465   1.479 0.139273    
-    ## equipoBelgrano            0.03311    0.16045   0.206 0.836513    
-    ## equipoBoca Juniors        0.73412    0.11971   6.133 8.65e-10 ***
-    ## equipoCA Huracán          0.30407    0.12861   2.364 0.018067 *  
-    ## equipoCA Unión            0.32495    0.12818   2.535 0.011243 *  
-    ## equipoCC Córdoba          0.40055    0.15017   2.667 0.007649 ** 
-    ## equipoChacarita           0.12483    0.23210   0.538 0.590713    
-    ## equipoClub Olimpo         0.17855    0.17214   1.037 0.299638    
-    ## equipoColón               0.22228    0.13072   1.700 0.089058 .  
-    ## equipoDefensa y Just      0.50324    0.12413   4.054 5.03e-05 ***
-    ## equipoEstudiantes         0.42257    0.12592   3.356 0.000791 ***
-    ## equipoGimnasia ELP        0.21697    0.13089   1.658 0.097407 .  
-    ## equipoGodoy Cruz          0.41603    0.12618   3.297 0.000976 ***
-    ## equipoIndependiente       0.43344    0.12591   3.442 0.000577 ***
-    ## equipoLanús               0.41103    0.12642   3.251 0.001149 ** 
-    ## equipoNewell's OB         0.31287    0.12832   2.438 0.014762 *  
-    ## equipoPatronato           0.29229    0.12908   2.264 0.023548 *  
-    ## equipoPlatense            0.39547    0.16614   2.380 0.017296 *  
-    ## equipoQuilmes            -0.30630    0.26311  -1.164 0.244362    
-    ## equipoRacing Club         0.64753    0.12139   5.334 9.60e-08 ***
-    ## equipoRafaela             0.21750    0.21190   1.026 0.304704    
-    ## equipoRiver Plate         0.77969    0.11906   6.549 5.81e-11 ***
-    ## equipoRosario Cent        0.40610    0.12642   3.212 0.001317 ** 
-    ## equipoSan Lorenzo         0.42331    0.12592   3.362 0.000775 ***
-    ## equipoSan Martin          0.30629    0.22448   1.364 0.172421    
-    ## equipoSan Martín SJ       0.24471    0.15171   1.613 0.106737    
-    ## equipoSarmiento           0.22968    0.15218   1.509 0.131234    
-    ## equipoTalleres            0.45373    0.12521   3.624 0.000290 ***
-    ## equipoTemperley           0.17506    0.17205   1.017 0.308923    
-    ## equipoTigre               0.49915    0.13321   3.747 0.000179 ***
-    ## equipoTucumán             0.35517    0.12761   2.783 0.005384 ** 
-    ## equipoVélez Sarsf         0.42430    0.12605   3.366 0.000762 ***
-    ## oponenteArgentinos Jun   -0.38751    0.11724  -3.305 0.000949 ***
-    ## oponenteArsenal          -0.05093    0.10581  -0.481 0.630281    
-    ## oponenteBanfield         -0.30972    0.10812  -2.865 0.004177 ** 
-    ## oponenteBarracas Central -0.05098    0.18244  -0.279 0.779925    
-    ## oponenteBelgrano         -0.33319    0.13303  -2.505 0.012256 *  
-    ## oponenteBoca Juniors     -0.60998    0.11845  -5.150 2.61e-07 ***
-    ## oponenteCA Huracán       -0.37128    0.11002  -3.375 0.000739 ***
-    ## oponenteCA Unión         -0.19156    0.10491  -1.826 0.067846 .  
-    ## oponenteCC Córdoba       -0.08974    0.12660  -0.709 0.478412    
-    ## oponenteChacarita         0.02771    0.17650   0.157 0.875268    
-    ## oponenteClub Olimpo       0.04052    0.13365   0.303 0.761766    
-    ## oponenteColón            -0.21757    0.10565  -2.059 0.039453 *  
-    ## oponenteDefensa y Just   -0.43448    0.11259  -3.859 0.000114 ***
-    ## oponenteEstudiantes      -0.27583    0.10743  -2.567 0.010246 *  
-    ## oponenteGimnasia ELP     -0.29049    0.10760  -2.700 0.006939 ** 
-    ## oponenteGodoy Cruz       -0.13776    0.10366  -1.329 0.183845    
-    ## oponenteIndependiente    -0.40792    0.11169  -3.652 0.000260 ***
-    ## oponenteLanús            -0.07877    0.10226  -0.770 0.441121    
-    ## oponenteNewell's OB      -0.33736    0.10904  -3.094 0.001975 ** 
-    ## oponentePatronato        -0.10413    0.10274  -1.014 0.310813    
-    ## oponentePlatense         -0.21440    0.14982  -1.431 0.152406    
-    ## oponenteQuilmes           0.03951    0.16971   0.233 0.815921    
-    ## oponenteRacing Club      -0.35751    0.11003  -3.249 0.001157 ** 
-    ## oponenteRafaela          -0.30012    0.19714  -1.522 0.127925    
-    ## oponenteRiver Plate      -0.49627    0.11454  -4.333 1.47e-05 ***
-    ## oponenteRosario Cent     -0.12825    0.10339  -1.240 0.214817    
-    ## oponenteSan Lorenzo      -0.26450    0.10709  -2.470 0.013518 *  
-    ## oponenteSan Martin        0.05511    0.18040   0.305 0.759995    
-    ## oponenteSan Martín SJ    -0.05336    0.12186  -0.438 0.661491    
-    ## oponenteSarmiento         0.01030    0.11908   0.087 0.931044    
-    ## oponenteTalleres         -0.33535    0.10925  -3.070 0.002143 ** 
-    ## oponenteTemperley         0.04618    0.13366   0.346 0.729714    
-    ## oponenteTigre            -0.02758    0.11106  -0.248 0.803868    
-    ## oponenteTucumán          -0.16262    0.10448  -1.557 0.119589    
-    ## oponenteVélez Sarsf      -0.30448    0.10832  -2.811 0.004940 ** 
-    ## localia                   0.25335    0.02938   8.623  < 2e-16 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## (Dispersion parameter for poisson family taken to be 1)
-    ## 
-    ##     Null deviance: 5117.3  on 4257  degrees of freedom
-    ## Residual deviance: 4768.1  on 4186  degrees of freedom
-    ## AIC: 11518
-    ## 
-    ## Number of Fisher Scoring iterations: 5
+(Dispersion parameter for poisson family taken to be 1 )
+
+|                    |                                 |
+|:------------------:|:-------------------------------:|
+|   Null deviance:   | 5117 on 4257 degrees of freedom |
+| Residual deviance: | 4768 on 4186 degrees of freedom |
 
 To make our analysis, bear in mind that the results are displayed in the
 log scale, so we have to calculate $e ^ {estimate_i}$. Does the home
