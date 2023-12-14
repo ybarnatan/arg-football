@@ -12,8 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-### Import libraries and data
-```{r,  warning=FALSE, message=FALSE, error=TRUE}
+```{r,  warning=FALSE, message=FALSE, error=TRUE, echo=FALSE}
+#----------------------------
+# Import libraries and data
+#----------------------------
 library(ggplot2)
 library(readxl)
 library(dplyr)
@@ -24,10 +26,10 @@ library(formatR)
 
 pathBase = dirname(rstudioapi::getSourceEditorContext()$path)
 partidos <- read_csv(paste0(pathBase,"/partidos.csv"))
-```
 
-###  Aesthethic variables
-```{r, warning=FALSE, message=FALSE, error=TRUE}
+#----------------------------
+#  Aesthethic variables
+#----------------------------
 colores = c(
     '2016-2017' ='yellow',
     '2017-2018' = "green",
@@ -51,13 +53,13 @@ fuentes_customizadas = list( theme(
 ```
 
 
-# **EDA: SEASON-WISE ANALYSIS**
+# **SEASON-WISE ANALYSIS**
 
 The first thing to evaluate is how many goals were scored per season. We can conclude from this simple analysis that the 2016-17 season had the highest number of goals scored while the 2019-20 (probably due to the suspension of lots of matches due to the COVID-19 pandemic) was the poorest one.
 
 ## 1.- Total goals per season
 
-```{r, warning=FALSE, message=FALSE, tidy=TRUE}
+```{r, warning=FALSE, message=FALSE, tidy=TRUE, echo=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -88,9 +90,9 @@ GOLES.TOTALES
 
 ## 2.- Goals per season - Home vs Away
 
-The following back-to-back plot allows a comparison per season of the number of goals scored by the home and away teams. At a qualitatively level, we can see that the home team tends to score more goals that the away team.
+Let´s begin with the home effect analysis. The following back-to-back plot allows a comparison per season of the number of goals scored by the home and away teams. At a qualitatively level, we can see that the home team tends to score more goals that the away team. We can easily perceive there is indeed such an effect, and this type of analysis could be done match-wise within a season.
 
-```{r,  warning=FALSE, message=FALSE, tidy=TRUE }
+```{r,  warning=FALSE, message=FALSE, tidy=TRUE, echo=FALSE }
 #-------------------
 #   Data processing
 #-------------------
@@ -119,7 +121,7 @@ the_order <- temp_df$temporada
 ```
 
 
-```{r,  warning=FALSE, message=FALSE, tidy=TRUE,echo=FALSE }
+```{r,  warning=FALSE, message=FALSE, tidy=TRUE, echo=FALSE }
 #----------------
 #     PLOT
 #----------------
@@ -215,11 +217,11 @@ GOLES.X.PARTIDO
 
 
 
-# **EDA: CLUB-WISE ANALYSIS**
+# **CLUB-WISE ANALYSIS**
 
 ## 1.- Goals per team
 
-The following plot depicts the number of goals scored by team and by season:
+The following plot depicts the number of goals scored by team and by season.
 
 * Boca Juniors, Racing Club and River Plate seem to be the teams that score the most, throughout the seasons analyzed.
 * There are teams missing in some seasons due to relegation (which, as the number of matches per season, constantly changed in this league during this period)
@@ -273,7 +275,7 @@ Are there teams that are booked more than others?
 * For the former, several teams have accumulated a high number of yellow cards, while for the latter Boca Juniors seems to have the excessive amount fo cards
 * For red ones, Rosario Central appears to be the most aggressive one during the 2016-17 season while San Lorenzo repeats that trend during the 2021.
 
-```{r, warning=FALSE,message=FALSE}
+```{r, warning=FALSE,message=FALSE, echo=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -337,7 +339,7 @@ ROJAS.X.EQ
 Are there more/less strict referees in terms of bookings? Not all of them delivered justice in every season, but some of them appear to be more prone to showing yellow and red cards.
 
 
-```{r, warning=FALSE,message=FALSE}
+```{r, warning=FALSE,message=FALSE, echo=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -394,7 +396,7 @@ We're going to use the last season available for the most updated data (i.e. sea
 
 ## 1.- Season development and winner
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -469,7 +471,7 @@ Such distribution assumes:
 This distribution has only one parameter, lambda, which is the average number events per period of time. In terms of our study case, lambda will represent the average number of goals scored per 90-min match.
 
 
-```{r, warning=FALSE, message=FALSE, error=TRUE}
+```{r, warning=FALSE, message=FALSE, error=TRUE, echo=FALSE}
 
 HOME.AVG = mean(data$local_goles) 
 AWAY.AVG = mean(data$visitante_goles)
@@ -487,7 +489,7 @@ The plot below shows the proportion of matches where goals were scored by the ho
 * The fitted model does not seem to deviate greatly from the actual seen numbers. 
 
 
-```{r, warning=FALSE, message=FALSE, error=TRUE}
+```{r, warning=FALSE, message=FALSE, error=TRUE, echo=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -590,7 +592,7 @@ We can go a step further with the simple Poisson model, estimating the probabili
 What about draws? for this, we need to know when the difference between the home and away team Poisson distributions is 0. The distribution that results from substracting one Poisson from is called a Skellam distribution.
 
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -634,7 +636,7 @@ SKELLAM.DISTRIB
 
 Finally, lets build a GLM model with which we can make some specific analysis on the participating teams. 
 
-```{r, warning=FALSE, message=FALSE, error=TRUE}
+```{r, warning=FALSE, message=FALSE, error=TRUE, echo=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -663,7 +665,7 @@ nPartidos = partidos %>%
 Note that if we apply this model to a small sample size (lets say when the season is going through the 8th matchweek, where each team in the season would've played `r nPartidos` matches), the accuracy of this approximation can vary significantly.
 
 
-```{r, echo=FALSE, fig.align = 'center', fig.width=8, fig.height=6}
+```{r, message=FALSE, warning=FALSE} 
 summary(poi_model)
 ```
 
@@ -684,7 +686,7 @@ If we plot the "equipo" and the "oponente" estimates per team, separatedly, we c
 
 #### 4a. Attacking strenght estimated by the model:
 
-```{r, echo=FALSE, fig.align = 'center', fig.width=8, fig.height=6}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -698,7 +700,7 @@ potenciales_goles$estimate_lineal = exp(potenciales_goles$estimate)
 potenciales_goles$equipo <- stringr::str_replace(potenciales_goles$equipo , "equipo", "")
 ```
 
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 mentality = data.frame(poi_model$coefficients)
 mentality <- cbind(newColName = rownames(mentality ), mentality )
 rownames(mentality ) <- 1:nrow(mentality )
@@ -734,14 +736,14 @@ POTENCIAL.GOLES =  ggplot(potenciales_goles,
 
 Given the model's estimates, the largest estimate for the offensive power is for `r most_offensive`.
 
-```{r, echo=FALSE, fig.align = 'center', fig.width=8, fig.height=6}
+```{r, fig.align = 'center', fig.width=8, fig.height=6}
 POTENCIAL.GOLES
 ```
 
 
 #### 4b.  Deffensive strenght estimated by the model:
 
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #-------------------
 #   Data processing
 #-------------------
@@ -772,7 +774,7 @@ POTENCIA.DEF =  ggplot(poder_defensivo,
 Given the model's estimates, the largest estimate for the defensive power is for `r most_deffensive`.
 
 
-```{r, echo=FALSE, fig.align = 'center', fig.width=8, fig.height=6}
+```{r,  fig.align = 'center', fig.width=8, fig.height=6}
 POTENCIA.DEF
 ```
 

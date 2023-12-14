@@ -1,47 +1,7 @@
 Argentinean League Football Analysis (2016-2022)
 ================
 
-### Import libraries and data
-
-``` r
-library(ggplot2)
-library(readxl)
-library(dplyr)
-library(readr)
-library(viridis)
-library(skellam)
-library(formatR)
-
-pathBase = dirname(rstudioapi::getSourceEditorContext()$path)
-partidos <- read_csv(paste0(pathBase,"/partidos.csv"))
-```
-
-### Aesthethic variables
-
-``` r
-colores = c(
-    '2016-2017' ='yellow',
-    '2017-2018' = "green",
-    '2018-2019' = "orange",
-    '2019-2020' = 'pink',
-    '2021' = 'magenta',
-    '2022' = "red")
-
-fuentes_customizadas = list( theme(
-                text = element_text(size=14, color = "black"),
-                axis.text.x = element_text(face="plain",size = 11, color="black"),
-                axis.text.y = element_text(face="plain", size = 11, color="black"),
-                plot.title = element_text(size = 12, face = "bold"),
-                legend.position = "none",
-                legend.key.size = unit(0.5, 'cm'),
-                panel.grid.major = element_blank(), 
-                panel.grid.minor = element_blank(),
-                panel.background = element_blank(), 
-                axis.line = element_line(colour = "black")), 
-                labs(fill = ""))
-```
-
-# **EDA: SEASON-WISE ANALYSIS**
+# **SEASON-WISE ANALYSIS**
 
 The first thing to evaluate is how many goals were scored per season. We
 can conclude from this simple analysis that the 2016-17 season had the
@@ -51,55 +11,18 @@ poorest one.
 
 ## 1.- Total goals per season
 
-``` r
-#-------------------
-# Data processing
-#-------------------
-partidos <- na.omit(partidos)
-partidos$goles_total = partidos$local_goles + partidos$visitante_goles
-
-goles_tot = partidos %>%
-    group_by(temporada) %>%
-    dplyr::summarise(n_goles_total = sum(goles_total))
-```
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
 
 ## 2.- Goals per season - Home vs Away
 
-The following back-to-back plot allows a comparison per season of the
-number of goals scored by the home and away teams. At a qualitatively
-level, we can see that the home team tends to score more goals that the
-away team.
+Let´s begin with the home effect analysis. The following back-to-back
+plot allows a comparison per season of the number of goals scored by the
+home and away teams. At a qualitatively level, we can see that the home
+team tends to score more goals that the away team. We can easily
+perceive there is indeed such an effect, and this type of analysis could
+be done match-wise within a season.
 
-``` r
-#-------------------
-# Data processing
-#-------------------
-goles_local = partidos %>%
-    group_by(temporada) %>%
-    dplyr::summarise(n_goles_local = sum(local_goles))
-
-goles_visitante = partidos %>%
-    group_by(temporada) %>%
-    dplyr::summarise(n_goles_visitante = sum(visitante_goles))
-
-goles = merge(goles_local, goles_visitante, by = "temporada")
-goles$temporada = as.factor(goles$temporada)
-
-goles_long = reshape2::melt(goles, value.name = "nro_goles", variable.name = "localia",
-    id.vars = c("temporada"))
-goles_df = goles_long %>%
-    mutate(nro_goles = ifelse(localia == "n_goles_visitante", -nro_goles, nro_goles))
-
-temp_df <- goles_df %>%
-    filter(localia == "local") %>%
-    arrange(nro_goles)
-
-the_order <- temp_df$temporada
-```
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
 
 ## 3.- Heatmap: goals per week of the season
 
@@ -113,7 +36,7 @@ We may get several insights from it.
 - The 2019-20 season was, definitively, the shortest due to the
   pandemic.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
 ## 4.- Heatmap: goals per match of the season
 
@@ -122,14 +45,14 @@ match week per season. With these values we can see what is the expected
 (I use this term as the average, indistinctly) number of goals per
 match.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 
-# **EDA: CLUB-WISE ANALYSIS**
+# **CLUB-WISE ANALYSIS**
 
 ## 1.- Goals per team
 
 The following plot depicts the number of goals scored by team and by
-season:
+season.
 
 - Boca Juniors, Racing Club and River Plate seem to be the teams that
   score the most, throughout the seasons analyzed.
@@ -137,7 +60,7 @@ season:
   the number of matches per season, constantly changed in this league
   during this period)
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
 
 ## 2.- Cards per team
 
@@ -152,30 +75,9 @@ Are there teams that are booked more than others?
   during the 2016-17 season while San Lorenzo repeats that trend during
   the 2021.
 
-``` r
-#-------------------
-#   Data processing
-#-------------------
-
-tarjetas_local = partidos %>%  group_by(temporada, local) %>% 
-    dplyr::summarise(amarillas = sum(local_amarillas),
-              rojas = sum(local_rojas))
-colnames(tarjetas_local)[which(names(tarjetas_local) == 'local')] <- 'equipo'
-
-tarjetas_visitante = partidos %>%  group_by(temporada, visitante) %>% 
-    dplyr::summarise(amarillas = sum(visitante_amarillas),
-              rojas = sum(visitante_rojas))
-colnames(tarjetas_visitante)[which(names(tarjetas_visitante) == 'visitante')] <- 'equipo'
-
-tarj = merge(x=tarjetas_local, y=tarjetas_visitante, by=c('temporada', 'equipo'))
-tarj$equipo = as.factor(tarj$equipo)
-tarj$amarillas = tarj$amarillas.x + tarj$amarillas.y
-tarj$rojas = tarj$rojas.x + tarj$rojas.y
-```
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-17-1.png" style="display: block; margin: auto;" />
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
 
 ## 3.- Referee’s cards performance
 
@@ -183,27 +85,9 @@ Are there more/less strict referees in terms of bookings? Not all of
 them delivered justice in every season, but some of them appear to be
 more prone to showing yellow and red cards.
 
-``` r
-#-------------------
-#   Data processing
-#-------------------
-arbitros = partidos %>% group_by(temporada, arbitro) %>%  
-    dplyr::summarise(ama_al_local = sum(local_amarillas),
-              ama_al_visitante = sum(visitante_amarillas),
-              roja_al_local = sum(local_rojas),
-              roja_al_visitante = sum(visitante_rojas))
-
-arbitros$amarillas_totales = arbitros$ama_al_local + arbitros$ama_al_visitante
-arbitros$rojas_totales = arbitros$roja_al_local + arbitros$roja_al_visitante
-
-ama_df <-arbitros %>% arrange(amarillas_totales)
-
-roja_df <- arbitros %>%  arrange(rojas_totales)
-```
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-21-1.png" style="display: block; margin: auto;" />
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-23-1.png" style="display: block; margin: auto;" />
 
 # PREDICTING RESULTS WITH STATISTICAL MODELLING
 
@@ -212,63 +96,7 @@ We’re going to use the last season available for the most updated data
 
 ## 1.- Season development and winner
 
-``` r
-#-------------------
-#   Data processing
-#-------------------
-data = partidos %>% filter(temporada == '2022')
-data = data[c('local', 'visitante', 'semana', 'resultado', 'local_goles', 'visitante_goles')]
-
-season_development = data.frame()
-
-for (i in unique(data$local)) {
-        result = data %>% filter(local == i | visitante == i) #filtro x equipo
-        result = result[c('local', 'visitante' ,'resultado', 'semana')]
-        result$equipo = i
-        result$puntos = 0
-        #Generar una columna con case when
-        df_temp= result %>%
-          mutate(puntos = case_when(
-            (local==i & resultado == 'empate') ~ 1,
-            (local==i & resultado == 'local') ~ 3,
-            (local==i & resultado == 'visitante') ~ 0,
-            (visitante==i & resultado == 'empate') ~ 1,
-            (visitante==i & resultado == 'local') ~ 0,
-            (visitante==i & resultado == 'visitante') ~ 3
-            )) 
-        df_temp$puntos_acum = cumsum(df_temp$puntos)
-        #df_temp = df_temp[c('semana' ,'equipo','puntos')]
-        season_development = rbind(season_development, df_temp)
-}
-        
-GANADOR = season_development[which.max(season_development$puntos_acum),]$equipo
-
-#-------------------
-#   PLOT
-#-------------------
-
-EVOL.TEMPORADA =
-ggplot(data = season_development) + 
-                geom_line(aes(x=semana, y=puntos_acum, 
-                          color=equipo
-                          ), alpha=0.7) +
-                geom_point(aes(x=semana, y=puntos_acum, 
-                           color=equipo))+
-    theme_bw() + 
-    fuentes_customizadas+ 
-    xlab("Matchweek")+
-    ylab("Accumulated points")+
-    ggtitle("Development of the season")+
-    theme(legend.position = 'bottom')+
-    labs(color='Teams') +
-    geom_point(aes(x=max(semana),y=max(puntos_acum)), fill='grey',colour="black",
-                   shape=21, size=2.5) +
-    annotate(geom='text', 
-             x=max(season_development$semana)-2, 
-             y=max(season_development$puntos_acum) +2, label=GANADOR,color="black")
-```
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-25-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
 
 First, let’s look at the development of the season, whose winner was
 Boca Juniors.
@@ -287,11 +115,6 @@ Such distribution assumes:
 This distribution has only one parameter, lambda, which is the average
 number events per period of time. In terms of our study case, lambda
 will represent the average number of goals scored per 90-min match.
-
-``` r
-HOME.AVG = mean(data$local_goles) 
-AWAY.AVG = mean(data$visitante_goles)
-```
 
 We can directly calculate the average number of goals in the desired
 season, so that the home team scores in average 1.2 while the away team
@@ -313,59 +136,7 @@ goals as before (estimated, lines).
 - The fitted model does not seem to deviate greatly from the actual seen
   numbers.
 
-``` r
-#-------------------
-#   Data processing
-#-------------------
-data_temp = reshape2::melt(data, direction = 'long',
-                          value.name = 'equipo',
-                          variable.name = "condicion",
-                          id.vars=c("semana", "local_goles", 'visitante_goles')) 
-
-data_temp_local = data_temp %>% filter(condicion =='local')
-data_temp_local = data_temp_local[,c("semana", 'local_goles','condicion','equipo' )]
-colnames(data_temp_local)[which(names(data_temp_local) == 'local_goles')] <- 'n_goles'
-
-data_temp_vis = data_temp %>% filter(condicion =='visitante')
-data_temp_vis = data_temp_vis[,c("semana", 'visitante_goles','condicion','equipo' )]
-colnames(data_temp_vis)[which(names(data_temp_vis) == 'visitante_goles')] <- 'n_goles'
-
-data_long = rbind(data_temp_local, data_temp_vis)
-
-prop_obs_local = data_long %>% 
-    filter(condicion=='local') %>% 
-    group_by(n_goles) %>% 
-   dplyr::summarise(prop_goles=n()/nrow(.))  
-prop_obs_local$observacion = 'observada'
-prop_obs_local$condicion = 'local'
-
-prop_obs_vis = data_long %>% 
-    filter(condicion=='visitante') %>% 
-    group_by(n_goles) %>% 
-    dplyr::summarise(prop_goles=n()/nrow(.))  
-prop_obs_vis$observacion = 'observada'
-prop_obs_vis$condicion = 'visitante'
-
-dpois_obs = rbind(prop_obs_local, prop_obs_vis)
-
-prop_est_local = data.frame(
-    prop_goles = dpois(0:max(data_long$n_goles),mean(data$local_goles)),
-    n_goles = seq(0,max(data_long$n_goles, by=1)))
-prop_est_local$observacion = 'estimada'
-prop_est_local$condicion = 'local'
-
-prop_est_vis = data.frame(
-    prop_goles = dpois(0:max(data_long$n_goles), mean(data$visitante_goles)),
-    n_goles = seq(0,max(data_long$n_goles, by=1)))
-prop_est_vis$observacion = 'estimada'
-prop_est_vis$condicion = 'visitante'
-
-dpois_est = rbind(prop_est_local, prop_est_vis)
-
-specific.val = ppois(q=1, lambda= mean(data$local_goles), lower.tail=FALSE)
-```
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
 
 We can go a step further with the simple Poisson model, estimating the
 probability of specific events. For example, what is the probability of
@@ -379,47 +150,16 @@ the home and away team Poisson distributions is 0. The distribution that
 results from substracting one Poisson from is called a Skellam
 distribution.
 
-``` r
-#-------------------
-#   Data processing
-#-------------------
-data$gol_diff = data$local_goles - data$visitante_goles 
-
-diff_gol = data %>% group_by(gol_diff) %>%
-    dplyr::summarize(prop_goles_obs=n()/nrow(.)) %>%
-     inner_join(data.frame(gol_diff=-4:5,
-                prop_goles_estimado=skellam::dskellam(-4:5,mean(data$local_goles),
-                mean(data$visitante_goles))),by=c("gol_diff"))
-```
-
     ## <ScaleContinuousPosition>
     ##  Range:  
     ##  Limits:    0 --    1
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-32-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
 
 ## 4.- Build a model
 
 Finally, lets build a GLM model with which we can make some specific
 analysis on the participating teams.
-
-``` r
-#-------------------
-#   Data processing
-#-------------------
-df_model =  rbind(
-            data.frame(n_goles = partidos$local_goles,
-                       equipo = partidos$local,
-                       oponente = partidos$visitante,
-                       localia = 1),
-            data.frame(n_goles = partidos$visitante_goles,
-                       equipo = partidos$visitante,
-                       oponente = partidos$local,
-                       localia = 0))
- 
-poi_model = glm(n_goles ~ equipo + oponente + localia,
-                family=poisson(link=log),data=df_model)
-```
 
 ``` r
 nPartidos = partidos %>%
@@ -431,6 +171,10 @@ Note that if we apply this model to a small sample size (lets say when
 the season is going through the 8th matchweek, where each team in the
 season would’ve played 27 matches), the accuracy of this approximation
 can vary significantly.
+
+``` r
+summary(poi_model)
+```
 
     ## 
     ## Call:
@@ -551,36 +295,22 @@ terms of average goals received).
 
 #### 4a. Attacking strenght estimated by the model:
 
-``` r
-mentality = data.frame(poi_model$coefficients)
-mentality <- cbind(newColName = rownames(mentality ), mentality )
-rownames(mentality ) <- 1:nrow(mentality )
-colnames(mentality ) = c("equipo", 'estimate')
-
-most_offensive = mentality[which.max(mentality$estimate),]$equipo
-most_offensive = gsub('equipo','',most_offensive)
-
-most_deffensive = mentality[which.min(mentality$estimate),]$equipo
-most_deffensive = gsub('oponente','',most_deffensive)
-```
-
 Given the model’s estimates, the largest estimate for the offensive
 power is for River Plate.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-39-1.png" style="display: block; margin: auto;" />
+``` r
+POTENCIAL.GOLES
+```
+
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-38-1.png" style="display: block; margin: auto;" />
 
 #### 4b. Deffensive strenght estimated by the model:
-
-``` r
-#-------------------
-#   Data processing
-#-------------------
-poder_defensivo = df %>% dplyr::filter(stringr::str_detect(equipo, 'oponente'))
-poder_defensivo$estimate_lineal = exp(poder_defensivo$estimate)
-poder_defensivo$equipo <- stringr::str_replace(poder_defensivo$equipo , "oponente", "")
-```
 
 Given the model’s estimates, the largest estimate for the defensive
 power is for Boca Juniors.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-42-1.png" style="display: block; margin: auto;" />
+``` r
+POTENCIA.DEF
+```
+
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-41-1.png" style="display: block; margin: auto;" />
