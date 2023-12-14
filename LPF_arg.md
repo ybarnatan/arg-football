@@ -253,7 +253,7 @@ approximation can vary significantly.
 When scannig the model’s results, bear in mind that these are displayed
 in the *log* scale, so we have to calculate $e ^ {estimate_i}$.
 
-Does the home factor weights? *yes!* since, $e^{0.25} = 1.28$.
+Does the home factor weights? **yes!** since, $e^{0.25} = 1.28$.
 
 Then we can analyze the performance of each team, using the “equipo”
 values of the model. Positive values mean that the team scores more than
@@ -295,3 +295,6 @@ Given the model’s estimates, the largest estimate for the defensive
 power is for Boca Juniors.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-41-1.png" style="display: block; margin: auto;" />
+
+Overall, we can conclude that both River Plate and Boca Juniors have the
+best offensive/defensive scores.
