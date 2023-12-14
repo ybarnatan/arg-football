@@ -204,10 +204,8 @@ We’re going to use the last season available for the most updated data.
 data = partidos %>% filter(temporada == '2022')
 data = data[c('local', 'visitante', 'semana', 'resultado', 'local_goles', 'visitante_goles')]
 
-#Create new df
 season_development = data.frame()
 
-#Populate the df.
 for (i in unique(data$local)) {
         result = data %>% filter(local == i | visitante == i) #filtro x equipo
         result = result[c('local', 'visitante' ,'resultado', 'semana')]
@@ -228,7 +226,6 @@ for (i in unique(data$local)) {
         season_development = rbind(season_development, df_temp)
 }
         
-#Get winner
 GANADOR = season_development[which.max(season_development$puntos_acum),]$equipo
 
 
