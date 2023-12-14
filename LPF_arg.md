@@ -150,10 +150,6 @@ this, we need to know when the difference between the home and away team
 Poisson distributions is 0. The distribution that results from
 subtracting one Poisson from another is called a Skellam distribution.
 
-    ## <ScaleContinuousPosition>
-    ##  Range:  
-    ##  Limits:    0 --    1
-
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
 
 With this plot we can see that for the Argentinean League, the most

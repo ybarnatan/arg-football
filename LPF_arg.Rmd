@@ -579,7 +579,7 @@ DISTRIB.POI = DISTRIB.POI  +
     labs(fill = "Condition")
 ```
 
-```{r,echo=FALSE,fig.align = 'center', fig.width=6, fig.height=6}
+```{r,echo=FALSE,fig.align = 'center', fig.width=6, fig.height=4}
 DISTRIB.POI 
 ```
 
@@ -618,7 +618,7 @@ SKELLAM.DISTRIB =
     theme(legend.position='none') + 
     xlab("Number of goals difference (Home - Away team)")+
     ylab("Proportion of matches")+
-    ggtitle("Skellam distribution for Home-Away results")
+    ggtitle("Skellam distribution for Home-Away results")+
     scale_x_continuous(breaks=-4:5, labels=-4:5)
 
 SKELLAM.DISTRIB =SKELLAM.DISTRIB +
@@ -627,7 +627,7 @@ SKELLAM.DISTRIB =SKELLAM.DISTRIB +
 ```
 
 
-```{r, echo=FALSE, fig.align = 'center', fig.width=6, fig.height=6}
+```{r, echo=FALSE, fig.align = 'center', fig.width=6, fig.height=4}
 SKELLAM.DISTRIB 
 ```
 
