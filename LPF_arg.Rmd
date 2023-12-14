@@ -386,7 +386,80 @@ ARBITROS_ROJA
 
 # PREDICTING RESULTS WITH STATISTICAL MODELLING
 
-We're going to use the last season available for the most updated data. To performe predictions, we'll apply the most basic distribution for discrete numbers (number of goals), that is, the Poisson distribution.
+We're going to use the last season available for the most updated data. 
+
+
+## 1.- Season development and winner
+
+```{r, warning=FALSE, message=FALSE}
+#-------------------
+#   Data processing
+#-------------------
+data = partidos %>% filter(temporada == '2022')
+data = data[c('local', 'visitante', 'semana', 'resultado', 'local_goles', 'visitante_goles')]
+
+#Create new df
+season_development = data.frame()
+
+#Populate the df.
+for (i in unique(data$local)) {
+        result = data %>% filter(local == i | visitante == i) #filtro x equipo
+        result = result[c('local', 'visitante' ,'resultado', 'semana')]
+        result$equipo = i
+        result$puntos = 0
+        #Generar una columna con case when
+        df_temp= result %>%
+          mutate(puntos = case_when(
+            (local==i & resultado == 'empate') ~ 1,
+            (local==i & resultado == 'local') ~ 3,
+            (local==i & resultado == 'visitante') ~ 0,
+            (visitante==i & resultado == 'empate') ~ 1,
+            (visitante==i & resultado == 'local') ~ 0,
+            (visitante==i & resultado == 'visitante') ~ 3
+            )) 
+        df_temp$puntos_acum = cumsum(df_temp$puntos)
+        #df_temp = df_temp[c('semana' ,'equipo','puntos')]
+        season_development = rbind(season_development, df_temp)
+}
+        
+#Get winner
+GANADOR = season_development[which.max(season_development$puntos_acum),]$equipo
+
+
+#-------------------
+#   PLOT
+#-------------------
+
+EVOL.TEMPORADA =
+ggplot(data = season_development) + 
+                geom_line(aes(x=semana, y=puntos_acum, 
+                          color=equipo
+                          ), alpha=0.7) +
+                geom_point(aes(x=semana, y=puntos_acum, 
+                           color=equipo))+
+    theme_bw() + 
+    fuentes_customizadas+ 
+    xlab("Matchweek")+
+    ylab("Accumulated points")+
+    ggtitle("Development of the season")+
+    theme(legend.position = 'bottom')+
+    labs(color='Teams') +
+    geom_point(aes(x=max(semana),y=max(puntos_acum)), fill='grey',colour="black",
+                   shape=21, size=2.5) +
+    annotate(geom='text', 
+             x=max(season_development$semana)-2, 
+             y=max(season_development$puntos_acum) +2, label=GANADOR,color="black")
+```
+
+```{r, echo=FALSE, fig.align = 'center', fig.width=10, fig.height=5}
+
+EVOL.TEMPORADA
+
+```
+
+First, let's look at the development of the season, whose winner was `r  GANADOR`. 
+
+Now to perform predictions, we'll apply the most basic distribution for discrete numbers (in our case, this will be the number of goals), that is, the Poisson distribution.
 
 Such distribution assumes:
 
@@ -398,11 +471,7 @@ This distribution has only one parameter, lambda, which is the average number ev
 
 
 ```{r, warning=FALSE, message=FALSE, error=TRUE}
-#-------------------
-#   Data processing
-#-------------------
-data = partidos %>% filter(temporada == '2022')
-data = data[c('local', 'visitante', 'semana', 'local_goles', 'visitante_goles')]
+
 HOME.AVG = mean(data$local_goles) 
 AWAY.AVG = mean(data$visitante_goles)
 ```
@@ -410,7 +479,7 @@ AWAY.AVG = mean(data$visitante_goles)
 We can directly calculate the average number of goals in the desired season, so that the home team scores in average `r round(HOME.AVG,2)` while the away team scores `r round(AWAY.AVG, 2)`
 
 
-## 1.- Number of goals per match (observed vs. expected)
+## 2.- Number of goals per match (observed vs. expected)
 
 The plot below shows the proportion of matches where goals were scored by the home and the away team (observed, bars), while also showing the estimated by the corresponding Poisson distributions using thee average goals as before (estimated, lines).
 
@@ -517,7 +586,7 @@ DISTRIB.POI
 We can go a step further with the simple Poisson model, estimating the probability of specific events. For example, what is the probability of the h ome team scoring 2 or more goals? we're asking for $P( \ge 2   |  Home)$, which is `r specific.val`.
  
 
-## 2.- Difference goal result: Skellam distribution + most probable scenarios
+## 3.- Difference goal result: Skellam distribution + most probable scenarios
 
 What about draws? for this, we need to know when the difference between the home and away team Poisson distributions is 0. The distribution that results from substracting one Poisson from is called a Skellam distribution.
 
@@ -562,7 +631,7 @@ SKELLAM.DISTRIB
 ```
 
 
-## 3.- Build a model
+## 4.- Build a model
 
 Finally, lets build a GLM model with which we can make some specific analysis on the participating teams. 
 
@@ -614,7 +683,7 @@ In other words, if you're playing these teams, you're less likely to score again
 
 If we plot the "equipo" and the "oponente" estimates per team, separatedly, we can get a peek of which team has the most probability of score above/below average, and which is the most/least defensive (in terms of average goals received).
 
-#### 3a. Attacking strenght estimated by the model:
+#### 4a. Attacking strenght estimated by the model:
 
 ```{r, echo=FALSE, fig.align = 'center', fig.width=8, fig.height=6}
 #-------------------
@@ -671,7 +740,7 @@ POTENCIAL.GOLES
 ```
 
 
-#### 3b.  Deffensive strenght estimated by the model:
+#### 4b.  Deffensive strenght estimated by the model:
 
 ```{r}
 #-------------------

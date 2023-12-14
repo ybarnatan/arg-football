@@ -41,7 +41,7 @@ fuentes_customizadas = list( theme(
                 labs(fill = ""))
 ```
 
-# **EDA: SEASON-WISE ANALYSIS**
+# **EDA: SEASON-WISE ANALYSIS **
 
 The first thing to evaluate is how many goals were scored per season. We
 can conclude from this simple analysis that the 2016-17 season had the
@@ -121,7 +121,6 @@ match.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
-
 # **EDA: CLUB-WISE ANALYSIS**
 
 ## 1.- Goals per team
@@ -135,7 +134,7 @@ season:
   the number of matches per season, constantly changed in this league
   during this period)
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
 
 ## 2.- Cards per team
 
@@ -162,9 +161,9 @@ tarj$amarillas = tarj$amarillas.x + tarj$amarillas.y
 tarj$rojas = tarj$rojas.x + tarj$rojas.y
 ```
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-21-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
 
 ## 3.- Referee’s cards performance
 
@@ -188,15 +187,79 @@ ama_df <-arbitros %>% arrange(amarillas_totales)
 roja_df <- arbitros %>%  arrange(rojas_totales)
 ```
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-25-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-26-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-23-1.png" style="display: block; margin: auto;" />
 
-# **PREDICTING RESULTS BY STATISTICAL MODELLING**
+# PREDICTING RESULTS WITH STATISTICAL MODELLING
 
 We’re going to use the last season available for the most updated data.
-To performe predictions, we’ll apply the most basic distribution for
-discrete numbers (number of goals), that is, the Poisson distribution.
+
+## 1.- Season development and winner
+
+``` r
+#-------------------
+#   Data processing
+#-------------------
+data = partidos %>% filter(temporada == '2022')
+data = data[c('local', 'visitante', 'semana', 'resultado', 'local_goles', 'visitante_goles')]
+
+#Create new df
+season_development = data.frame()
+
+#Populate the df.
+for (i in unique(data$local)) {
+        result = data %>% filter(local == i | visitante == i) #filtro x equipo
+        result = result[c('local', 'visitante' ,'resultado', 'semana')]
+        result$equipo = i
+        result$puntos = 0
+        #Generar una columna con case when
+        df_temp= result %>%
+          mutate(puntos = case_when(
+            (local==i & resultado == 'empate') ~ 1,
+            (local==i & resultado == 'local') ~ 3,
+            (local==i & resultado == 'visitante') ~ 0,
+            (visitante==i & resultado == 'empate') ~ 1,
+            (visitante==i & resultado == 'local') ~ 0,
+            (visitante==i & resultado == 'visitante') ~ 3
+            )) 
+        df_temp$puntos_acum = cumsum(df_temp$puntos)
+        #df_temp = df_temp[c('semana' ,'equipo','puntos')]
+        season_development = rbind(season_development, df_temp)
+}
+        
+#Get winner
+GANADOR = season_development[which.max(season_development$puntos_acum),]$equipo
+
+
+#-------------------
+#   PLOT
+#-------------------
+
+EVOL.TEMPORADA =
+ggplot(data = season_development) + 
+                geom_line(aes(x=semana, y=puntos_acum, 
+                          color=equipo,
+                          alpha=0.5)) +
+                geom_point(aes(x=semana, y=puntos_acum, 
+                           color=equipo))+
+    theme_bw() + 
+    fuentes_customizadas+ 
+    xlab("Matchweek")+
+    ylab("Accumulated points")+
+    ggtitle("Development of the season")+
+    theme(legend.position = 'bottom')+
+    labs(fill = "Teams")
+```
+
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-25-1.png" style="display: block; margin: auto;" />
+
+First, let’s look at the development of the season, whose winner was
+Boca Juniors.
+
+Now to perform predictions, we’ll apply the most basic distribution for
+discrete numbers (in our case, this will be the number of goals), that
+is, the Poisson distribution.
 
 Such distribution assumes:
 
@@ -210,11 +273,6 @@ number events per period of time. In terms of our study case, lambda
 will represent the average number of goals scored per 90-min match.
 
 ``` r
-#-------------------
-#   Data processing
-#-------------------
-data = partidos %>% filter(temporada == '2022')
-data = data[c('local', 'visitante', 'semana', 'local_goles', 'visitante_goles')]
 HOME.AVG = mean(data$local_goles) 
 AWAY.AVG = mean(data$visitante_goles)
 ```
@@ -223,7 +281,7 @@ We can directly calculate the average number of goals in the desired
 season, so that the home team scores in average 1.2 while the away team
 scores 0.91
 
-## 1.- Number of goals per match (observed vs. expected)
+## 2.- Number of goals per match (observed vs. expected)
 
 The plot below shows the proportion of matches where goals were scored
 by the home and the away team (observed, bars), while also showing the
@@ -291,14 +349,14 @@ dpois_est = rbind(prop_est_local, prop_est_vis)
 specific.val = ppois(q=1, lambda= mean(data$local_goles), lower.tail=FALSE)
 ```
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-30-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
 
 We can go a step further with the simple Poisson model, estimating the
 probability of specific events. For example, what is the probability of
 the h ome team scoring 2 or more goals? we’re asking for
 $P( \ge 2 | Home)$, which is 0.3391023.
 
-## 2.- Difference goal result: Skellam distribution + most probable scenarios
+## 3.- Difference goal result: Skellam distribution + most probable scenarios
 
 What about draws? for this, we need to know when the difference between
 the home and away team Poisson distributions is 0. The distribution that
@@ -322,9 +380,9 @@ diff_gol = data %>% group_by(gol_diff) %>%
     ##  Range:  
     ##  Limits:    0 --    1
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-32-1.png" style="display: block; margin: auto;" />
 
-## 3.- Build a model
+## 4.- Build a model
 
 Finally, lets build a GLM model with which we can make some specific
 analysis on the participating teams.
@@ -475,7 +533,7 @@ separatedly, we can get a peek of which team has the most probability of
 score above/below average, and which is the most/least defensive (in
 terms of average goals received).
 
-#### 3a. Attacking strenght estimated by the model:
+#### 4a. Attacking strenght estimated by the model:
 
 ``` r
 mentality = data.frame(poi_model$coefficients)
@@ -493,9 +551,9 @@ most_deffensive = gsub('oponente','',most_deffensive)
 Given the model’s estimates, the largest estimate for the offensive
 power is for River Plate.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-40-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-39-1.png" style="display: block; margin: auto;" />
 
-#### 3b. Deffensive strenght estimated by the model:
+#### 4b. Deffensive strenght estimated by the model:
 
 ``` r
 #-------------------
@@ -509,4 +567,4 @@ poder_defensivo$equipo <- stringr::str_replace(poder_defensivo$equipo , "oponent
 Given the model’s estimates, the largest estimate for the defensive
 power is for Boca Juniors.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-43-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-42-1.png" style="display: block; margin: auto;" />
