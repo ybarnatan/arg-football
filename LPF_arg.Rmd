@@ -271,6 +271,10 @@ GOLES.X.EQ
 
 Are there teams that are booked more than others? 
 
+* For yellow cards: the most intensive seasons seem to be 2016-17 and 2022 overall
+* For the former, several teams have accumulated a high number of yellow cards, while for the latter Boca Juniors seems to have the excessive amount fo cards
+* For red ones, Rosario Central appears to be the most aggressive one during the 2016-17 season while San Lorenzo repeats that trend during the 2021.
+
 ```{r, warning=FALSE,message=FALSE}
 #-------------------
 #   Data processing
@@ -332,7 +336,8 @@ ROJAS.X.EQ
 
 ## 3.-  Referee's cards performance
 
-Are there more/less strict referees in terms of bookings?
+Are there more/less strict referees in terms of bookings?  Not all of them delivered justice in every season, but some of them appear to be more prone to showing yellow and red cards.
+
 
 ```{r, warning=FALSE,message=FALSE}
 #-------------------
@@ -398,10 +403,8 @@ We're going to use the last season available for the most updated data.
 data = partidos %>% filter(temporada == '2022')
 data = data[c('local', 'visitante', 'semana', 'resultado', 'local_goles', 'visitante_goles')]
 
-#Create new df
 season_development = data.frame()
 
-#Populate the df.
 for (i in unique(data$local)) {
         result = data %>% filter(local == i | visitante == i) #filtro x equipo
         result = result[c('local', 'visitante' ,'resultado', 'semana')]
@@ -422,9 +425,7 @@ for (i in unique(data$local)) {
         season_development = rbind(season_development, df_temp)
 }
         
-#Get winner
 GANADOR = season_development[which.max(season_development$puntos_acum),]$equipo
-
 
 #-------------------
 #   PLOT
