@@ -1,7 +1,7 @@
 Argentinean League Football Analysis (2016-2022)
 ================
 
-### Import libraries
+### Import libraries and data
 
 ``` r
 library(ggplot2)
@@ -104,11 +104,14 @@ the_order <- temp_df$temporada
 ## 3.- Heatmap: goals per week of the season
 
 This heat map shows the number of goals scored by match week per season.
-We may get several insights from it. \* The last match week in the last
-two seasons showed a whooping number of goals scored in comparison to
-the rest of the seasons. \* Because of different formats applied to the
-Argentinean league, the length of the season was never kept constant. \*
-The 2019-20 season was, definitively, the shortest due to the pandemic.
+We may get several insights from it.
+
+- The last match week in the last two seasons showed a whooping number
+  of goals scored in comparison to the rest of the seasons.
+- Because of different formats applied to the Argentinean league, the
+  length of the season was never kept constant.
+- The 2019-20 season was, definitively, the shortest due to the
+  pandemic.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 
@@ -140,6 +143,15 @@ season:
 
 Are there teams that are booked more than others?
 
+- For yellow cards: the most intensive seasons seem to be 2016-17 and
+  2022 overall
+- For the former, several teams have accumulated a high number of yellow
+  cards, while for the latter Boca Juniors seems to have the excessive
+  amount fo cards
+- For red ones, Rosario Central appears to be the most aggressive one
+  during the 2016-17 season while San Lorenzo repeats that trend during
+  the 2021.
+
 ``` r
 #-------------------
 #   Data processing
@@ -167,7 +179,9 @@ tarj$rojas = tarj$rojas.x + tarj$rojas.y
 
 ## 3.- Referee’s cards performance
 
-Are there more/less strict referees in terms of bookings?
+Are there more/less strict referees in terms of bookings? Not all of
+them delivered justice in every season, but some of them appear to be
+more prone to showing yellow and red cards.
 
 ``` r
 #-------------------
@@ -193,7 +207,8 @@ roja_df <- arbitros %>%  arrange(rojas_totales)
 
 # PREDICTING RESULTS WITH STATISTICAL MODELLING
 
-We’re going to use the last season available for the most updated data.
+We’re going to use the last season available for the most updated data
+(i.e. season 2022).
 
 ## 1.- Season development and winner
 
@@ -228,7 +243,6 @@ for (i in unique(data$local)) {
         
 GANADOR = season_development[which.max(season_development$puntos_acum),]$equipo
 
-
 #-------------------
 #   PLOT
 #-------------------
@@ -236,8 +250,8 @@ GANADOR = season_development[which.max(season_development$puntos_acum),]$equipo
 EVOL.TEMPORADA =
 ggplot(data = season_development) + 
                 geom_line(aes(x=semana, y=puntos_acum, 
-                          color=equipo,
-                          alpha=0.5)) +
+                          color=equipo
+                          ), alpha=0.7) +
                 geom_point(aes(x=semana, y=puntos_acum, 
                            color=equipo))+
     theme_bw() + 
@@ -246,7 +260,12 @@ ggplot(data = season_development) +
     ylab("Accumulated points")+
     ggtitle("Development of the season")+
     theme(legend.position = 'bottom')+
-    labs(fill = "Teams")
+    labs(color='Teams') +
+    geom_point(aes(x=max(semana),y=max(puntos_acum)), fill='grey',colour="black",
+                   shape=21, size=2.5) +
+    annotate(geom='text', 
+             x=max(season_development$semana)-2, 
+             y=max(season_development$puntos_acum) +2, label=GANADOR,color="black")
 ```
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-25-1.png" style="display: block; margin: auto;" />
