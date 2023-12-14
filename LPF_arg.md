@@ -3,11 +3,11 @@ Argentinean League Football Analysis (2016-2022)
 
 # **SEASON-WISE ANALYSIS**
 
-The first thing to evaluate is how many goals were scored per season. We
-can conclude from this simple analysis that the 2016-17 season had the
-highest number of goals scored while the 2019-20 (probably due to the
-suspension of lots of matches due to the COVID-19 pandemic) was the
-poorest one.
+Let’s begin our Argentinean league study. The first thing to evaluate is
+how many goals were scored per season. We can conclude from this simple
+survey that the 2016-17 season had the highest number of goals scored
+while the 2019-20 (probably due to the suspension of lots of matches due
+to the COVID-19 pandemic) was the poorest one.
 
 ## 1.- Total goals per season
 
@@ -18,7 +18,7 @@ poorest one.
 Let´s begin with the home effect analysis. The following back-to-back
 plot allows a comparison per season of the number of goals scored by the
 home and away teams. At a qualitatively level, we can see that the home
-team tends to score more goals that the away team. We can easily
+team tends to score more goals than the away team. We can easily
 perceive there is indeed such an effect, and this type of analysis could
 be done match-wise within a season.
 
@@ -26,8 +26,8 @@ be done match-wise within a season.
 
 ## 3.- Heatmap: goals per week of the season
 
-This heat map shows the number of goals scored by match week per season.
-We may get several insights from it.
+Continuing our league analysis, this heat map shows the number of goals
+scored by match week per season. We may get several insights from it.
 
 - The last match week in the last two seasons showed a whooping number
   of goals scored in comparison to the rest of the seasons.
@@ -40,10 +40,10 @@ We may get several insights from it.
 
 ## 4.- Heatmap: goals per match of the season
 
-This heat map shows the average number of goals scored per match, by
-match week per season. With these values we can see what is the expected
-(I use this term as the average, indistinctly) number of goals per
-match.
+Next, this heat map shows the average number of goals scored per match,
+by match week per season. With these values we can see what is the
+expected (I use this term as the average, indistinctly) number of goals
+per match.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 
@@ -79,7 +79,7 @@ Are there teams that are booked more than others?
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
 
-## 3.- Referee’s cards performance
+## 3.- Bonus: Referee’s cards performance
 
 Are there more/less strict referees in terms of bookings? Not all of
 them delivered justice in every season, but some of them appear to be
@@ -89,7 +89,7 @@ more prone to showing yellow and red cards.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
 
-# PREDICTING RESULTS WITH STATISTICAL MODELLING
+# **PREDICTING RESULTS WITH STATISTICAL MODELLING**
 
 We’re going to use the last season available for the most updated data
 (i.e. season 2022).
@@ -101,9 +101,9 @@ We’re going to use the last season available for the most updated data
 First, let’s look at the development of the season, whose winner was
 Boca Juniors.
 
-Now to perform predictions, we’ll apply the most basic distribution for
-discrete numbers (in our case, this will be the number of goals), that
-is, the Poisson distribution.
+Now to perform predictions and recap on our home effect analysis, we’ll
+apply the most basic distribution for discrete numbers (in our case,
+this will be the number of goals), that is, the Poisson distribution.
 
 Such distribution assumes:
 
@@ -123,16 +123,16 @@ scores 0.91
 ## 2.- Number of goals per match (observed vs. expected)
 
 The plot below shows the proportion of matches where goals were scored
-by the home and the away team (observed, bars), while also showing the
-estimated by the corresponding Poisson distributions using thee average
-goals as before (estimated, lines).
+by the home or the away team (observed, bars), while also showing the
+estimated by the corresponding Poisson distributions using the average
+goals mentioned before (estimated, lines).
 
 - From the observed distributions, the away team seem to have a much
   higher proportion of matches without scoring any goals, and that
   number is greater than for the home team.
-- For scoring one goal, the proportion is similar, while the trend shows
-  a much higher proportion of matches where the home team scored 2 to 5
-  goals in comparison with the away team.
+- When scoring one goal, the proportion is similar, while the trend
+  shows a much higher proportion of matches where the home team scored 2
+  to 5 goals in comparison with the away team.
 - The fitted model does not seem to deviate greatly from the actual seen
   numbers.
 
@@ -145,10 +145,10 @@ $P( \ge 2 | Home)$, which is 0.3391023.
 
 ## 3.- Difference goal result: most probable scenarios
 
-What about draws? for this, we need to know when the difference between
-the home and away team Poisson distributions is 0. The distribution that
-results from subtracting one Poisson from another is called a Skellam
-distribution.
+What about draws? this is another way of inspecting the home effect. For
+this, we need to know when the difference between the home and away team
+Poisson distributions is 0. The distribution that results from
+subtracting one Poisson from another is called a Skellam distribution.
 
     ## <ScaleContinuousPosition>
     ##  Range:  
@@ -162,15 +162,15 @@ the home team winning by one goal and in third place, there is almost
 the same probability of the home team winning by two goals and the away
 team, winning by one goal.
 
-## 4.- Build a GLM odel
+## 4.- Build a GLM model
 
-Finally, lets build a GLM model with which we can make some specific
+Finally, let’s build a GLM model with which we can make some specific
 analysis on the participating teams.
 
 Note that if we apply this model to a small sample size (lets say when
-the season is going through the 8th matchweek, where each team in the
-season would’ve played 27 matches), the accuracy of this approximation
-can vary significantly.
+the season is going through the 8th match week, where each team in the
+entire season would’ve played 27 matches), the accuracy of this
+approximation can vary significantly.
 
 |                              | Estimate | Std. Error | z value | Pr(\>\|z\|) |
 |:----------------------------:|:--------:|:----------:|:-------:|:-----------:|
@@ -254,30 +254,31 @@ can vary significantly.
 |   Null deviance:   | 5117 on 4257 degrees of freedom |
 | Residual deviance: | 4768 on 4186 degrees of freedom |
 
-To make our analysis, bear in mind that the results are displayed in the
-log scale, so we have to calculate $e ^ {estimate_i}$. Does the home
-factor weights? yes! since $e^{0.25} = 1.28$.
+When scannig the model’s results, bear in mind that these are displayed
+in the *log* scale, so we have to calculate $e ^ {estimate_i}$.
+
+Does the home factor weights? *yes!* since, $e^{0.25} = 1.28$.
 
 Then we can analyze the performance of each team, using the “equipo”
-values. Positive values mean that the team scores more than average and
-negative, the opposite. For example:
+values of the model. Positive values mean that the team scores more than
+average and negative, the opposite. For example:
 
 - For River Plate: $e^{0.78} = 2.18$ \[River Plate scores 2.18 goals
   more than the average team\]
 - For Quilmes: $e^{-0.3} = 0.74$ \[Quilmes scores 0.74 goals than the
   average team\]
 
-Finally, the “oponente” values penalize/reward teams based on the
-quality of their opposition. This mimics the defensive strength of each
-team”
+Finally, the “oponente” values rewards teams based on the quality of
+their opposition. This mimics the defensive strength of each team”
 
 - For San Lorenzo, $e^{-0.26} = 0.77$
-- For River plate, $e^{-0.5} = 0.61$ In other words, if you’re playing
-  these teams, you’re less likely to score against River plate than San
-  Lorenzo.
+- For River plate, $e^{-0.5} = 0.61$
+
+In other words, if you’re playing against these teams, you’re less
+likely to score against River Plate than San Lorenzo.
 
 If we plot the “equipo” and the “oponente” estimates per team,
-separatedly, we can get a peek of which team has the most probability of
+separately, we can get a peek of which team has the most probability of
 score above/below average, and which is the most/least defensive (in
 terms of average goals received).
 
@@ -296,9 +297,5 @@ POTENCIAL.GOLES
 
 Given the model’s estimates, the largest estimate for the defensive
 power is for Boca Juniors.
-
-``` r
-POTENCIA.DEF
-```
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-41-1.png" style="display: block; margin: auto;" />
