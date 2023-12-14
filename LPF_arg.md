@@ -38,15 +38,6 @@ scored by match week per season. We may get several insights from it.
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
-## 4.- Heatmap: goals per match of the season
-
-Next, this heat map shows the average number of goals scored per match,
-by match week per season. With these values we can see what is the
-expected (I use this term as the average, indistinctly) number of goals
-per match.
-
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
-
 # **CLUB-WISE ANALYSIS**
 
 ## 1.- Goals per team
@@ -60,7 +51,7 @@ season.
   the number of matches per season, constantly changed in this league
   during this period)
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
 ## 2.- Cards per team
 
@@ -75,9 +66,9 @@ Are there teams that are booked more than others?
   during the 2016-17 season while San Lorenzo repeats that trend during
   the 2021.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-17-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
 
 ## 3.- Bonus: Referee’s cards performance
 
@@ -85,9 +76,9 @@ Are there more/less strict referees in terms of bookings? Not all of
 them delivered justice in every season, but some of them appear to be
 more prone to showing yellow and red cards.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-21-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-20-1.png" style="display: block; margin: auto;" />
 
 # **PREDICTING RESULTS WITH STATISTICAL MODELLING**
 
@@ -96,7 +87,7 @@ We’re going to use the last season available for the most updated data
 
 ## 1.- Season development and winner
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
 
 First, let’s look at the development of the season, whose winner was
 Boca Juniors.
@@ -136,12 +127,12 @@ goals mentioned before (estimated, lines).
 - The fitted model does not seem to deviate greatly from the actual seen
   numbers.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-26-1.png" style="display: block; margin: auto;" />
 
 We can go a step further with the simple Poisson model, estimating the
 probability of specific events. For example, what is the probability of
 the h ome team scoring 2 or more goals? we’re asking for
-$P( \ge 2 | Home)$, which is 0.3391023.
+$P( \ge 2 | Home)$, which is 0.34.
 
 ## 3.- Difference goal result: most probable scenarios
 
@@ -150,7 +141,7 @@ this, we need to know when the difference between the home and away team
 Poisson distributions is 0. The distribution that results from
 subtracting one Poisson from another is called a Skellam distribution.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
 
 With this plot we can see that for the Argentinean League, the most
 probable scenario is a 0-0 draw. Then, there is a higher probability of
@@ -287,14 +278,14 @@ power is for River Plate.
 POTENCIAL.GOLES
 ```
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-38-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-36-1.png" style="display: block; margin: auto;" />
 
 #### 4b. Deffensive strenght estimated by the model:
 
 Given the model’s estimates, the largest estimate for the defensive
 power is for Boca Juniors.
 
-<img src="LPF_arg_files/figure-gfm/unnamed-chunk-41-1.png" style="display: block; margin: auto;" />
+<img src="LPF_arg_files/figure-gfm/unnamed-chunk-39-1.png" style="display: block; margin: auto;" />
 
 Overall, we can conclude that both River Plate and Boca Juniors have the
 best offensive/defensive scores.
