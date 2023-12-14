@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-### Import libraries
+### Import libraries and data
 ```{r,  warning=FALSE, message=FALSE, error=TRUE}
 library(ggplot2)
 library(readxl)
@@ -50,11 +50,7 @@ fuentes_customizadas = list( theme(
                 labs(fill = ""))
 ```
 
-
-
-
-
-# **EDA: SEASON-WISE ANALYSIS **
+# **EDA: SEASON-WISE ANALYSIS**
 
 The first thing to evaluate is how many goals were scored per season. We can conclude from this simple analysis that the 2016-17 season had the highest number of goals scored while the 2019-20 (probably due to the suspension of lots of matches due to the COVID-19 pandemic) was the poorest one.
 
@@ -153,6 +149,7 @@ GOLES.LOCALIA
 ## 3.- Heatmap: goals per week of the season
 
 This heat map shows the number of goals scored by match week per season. We may get several insights from it.
+
 * The last match week in the last two seasons showed a whooping number of goals scored in comparison to the rest of the seasons.
 * Because of different formats applied to the Argentinean league, the length of the season was never kept constant. 
 * The 2019-20 season was, definitively, the shortest due to the pandemic.
@@ -336,7 +333,7 @@ ROJAS.X.EQ
 
 ## 3.-  Referee's cards performance
 
-Are there more/less strict referees in terms of bookings?  Not all of them delivered justice in every season, but some of them appear to be more prone to showing yellow and red cards.
+Are there more/less strict referees in terms of bookings? Not all of them delivered justice in every season, but some of them appear to be more prone to showing yellow and red cards.
 
 
 ```{r, warning=FALSE,message=FALSE}
@@ -391,7 +388,7 @@ ARBITROS_ROJA
 
 # PREDICTING RESULTS WITH STATISTICAL MODELLING
 
-We're going to use the last season available for the most updated data. 
+We're going to use the last season available for the most updated data (i.e. season 2022). 
 
 
 ## 1.- Season development and winner
@@ -484,9 +481,9 @@ We can directly calculate the average number of goals in the desired season, so 
 
 The plot below shows the proportion of matches where goals were scored by the home and the away team (observed, bars), while also showing the estimated by the corresponding Poisson distributions using thee average goals as before (estimated, lines).
 
-+ From the observed distributions, the away team seem to have a much higher proportion of matches without scoring any goals, and that number is greater than for the home team.
-+ For scoring one goal, the proportion is similar, while the trend shows a much higher proportion of matches where the home team scored 2 to 5 goals in comparison with the away team. 
-+ The fitted model does not seem to deviate greatly from the actual seen numbers. 
+* From the observed distributions, the away team seem to have a much higher proportion of matches without scoring any goals, and that number is greater than for the home team.
+* For scoring one goal, the proportion is similar, while the trend shows a much higher proportion of matches where the home team scored 2 to 5 goals in comparison with the away team. 
+* The fitted model does not seem to deviate greatly from the actual seen numbers. 
 
 
 ```{r, warning=FALSE, message=FALSE, error=TRUE}
@@ -612,7 +609,7 @@ diff_gol = data %>% group_by(gol_diff) %>%
 SKELLAM.DISTRIB = 
     ggplot() +
     geom_bar(data = diff_gol, 
-             aes(x = gol_diff, y = prop_goles_obs, fill='red', color='red'),
+             aes(x = gol_diff, y = prop_goles_obs, fill='grey21', color='grey21'),
              stat = "identity",  width=0.8) +
         fuentes_customizadas+
     theme(legend.position='none') + 
