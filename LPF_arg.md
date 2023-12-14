@@ -272,18 +272,14 @@ terms of average goals received).
 #### 4a. Attacking strenght estimated by the model:
 
 Given the model’s estimates, the largest estimate for the offensive
-power is for River Plate.
-
-``` r
-POTENCIAL.GOLES
-```
+power is for River Plate (in the linear scale).
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-36-1.png" style="display: block; margin: auto;" />
 
 #### 4b. Deffensive strenght estimated by the model:
 
 Given the model’s estimates, the largest estimate for the defensive
-power is for Boca Juniors.
+power is for Boca Juniors (in the linear scale).
 
 <img src="LPF_arg_files/figure-gfm/unnamed-chunk-39-1.png" style="display: block; margin: auto;" />
 

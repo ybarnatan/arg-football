@@ -706,9 +706,9 @@ POTENCIAL.GOLES =  ggplot(potenciales_goles,
     scale_fill_gradient(low = "blue4", high = "green")
 ```
 
-Given the model's estimates, the largest estimate for the offensive power is for `r most_offensive`.
+Given the model's estimates, the largest estimate for the offensive power is for `r most_offensive` (in the linear scale).
 
-```{r, fig.align = 'center', fig.width=8, fig.height=6}
+```{r, echo=FALSE, fig.align = 'center', fig.width=8, fig.height=6}
 POTENCIAL.GOLES
 ```
 
@@ -743,7 +743,7 @@ POTENCIA.DEF =  ggplot(poder_defensivo,
     scale_fill_gradient(low = "blue4", high = "green")
 ```
 
-Given the model's estimates, the largest estimate for the defensive power is for `r most_deffensive`.
+Given the model's estimates, the largest estimate for the defensive power is for `r most_deffensive` (in the linear scale).
 
 
 ```{r, echo=FALSE, fig.align = 'center', fig.width=8, fig.height=6}
