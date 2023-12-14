@@ -709,7 +709,7 @@ POTENCIAL.GOLES =  ggplot(potenciales_goles,
     fuentes_customizadas +
     ylab("Goals scored relative to average (GLM Poi model estimates)")+
     xlab("Team")+
-    ggtitle("Offensive strenght estimation per team by GLM Poi") +
+    ggtitle("Offensive strenght estimation\nper team by GLM Poi") +
     labs(fill = "")+
     scale_fill_gradient(low = "blue4", high = "green")
 ```
@@ -744,7 +744,7 @@ POTENCIA.DEF =  ggplot(poder_defensivo,
                    geom_bar(stat = "identity", width = 0.75) +
     coord_flip() +
     fuentes_customizadas +
-    ylab("Opponency to receive goals relative to average (GLM Poi model estimates)")+
+    ylab("Opponency to receive goals relative\nto average (GLM Poi model estimates)")+
     xlab("Team")+
     ggtitle("Deffensive strenght estimation per team by GLM Poi") +
     labs(fill = "")+
