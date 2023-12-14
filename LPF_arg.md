@@ -41,7 +41,7 @@ fuentes_customizadas = list( theme(
                 labs(fill = ""))
 ```
 
-# **EDA: SEASON-WISE ANALYSIS **
+# **EDA: SEASON-WISE ANALYSIS**
 
 The first thing to evaluate is how many goals were scored per season. We
 can conclude from this simple analysis that the 2016-17 season had the
