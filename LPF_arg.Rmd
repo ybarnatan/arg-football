@@ -117,6 +117,10 @@ temp_df <-
     arrange(nro_goles)
 
 the_order <- temp_df$temporada
+goles_df$localia <- factor(goles_df$localia,
+                           levels = c( "n_goles_visitante",'n_goles_local'))
+
+
 ```
 
 
@@ -132,11 +136,12 @@ GOLES.LOCALIA <- ggplot(data = goles_df,
     scale_y_continuous(breaks = seq(-600, 700, 100), 
                        labels = abs(seq(-600, 700, 100))) +
     labs(x = "Season", y = "Goals", title = "") +
-        scale_fill_manual(values= c('n_goles_local'= "springgreen", 
-                                    'n_goles_visitante'= "steelblue"),
-                      labels = c("n_goles_local"= 'Home' , 'n_goles_visitante'='Away'),
+        scale_fill_manual(values= c('n_goles_visitante'= "steelblue",
+                                    'n_goles_local'= "springgreen"),
+                      labels = c("n_goles_local"= 'Home',
+                                 'n_goles_visitante'='Away'),
                       name="",
-                      breaks=c("n_goles_local", "n_goles_visitante")) +
+                      breaks=c( "n_goles_visitante","n_goles_local")) +
     theme(legend.position = 'bottom')+
     theme(axis.text.x = element_text(angle = 25, hjust = 1))+
     ggtitle("Home and away team: back-to-back")
@@ -144,7 +149,9 @@ GOLES.LOCALIA <- ggplot(data = goles_df,
 
 
 ```{r, echo=FALSE, fig.align = 'center', fig.width=6, fig.height=4}
+
 GOLES.LOCALIA  
+
 ```
 
 
@@ -374,7 +381,8 @@ season_development = data.frame()
 
 for (i in unique(data$local)) {
         result = data %>% filter(local == i | visitante == i) #filtro x equipo
-        result = result[c('local', 'visitante' ,'resultado', 'semana')]
+        result = result[c('local', 'visitante' ,'resultado')]
+        result$semana = seq(1, nrow(result), by=1)
         result$equipo = i
         result$puntos = 0
         #Generar una columna con case when
