@@ -61,7 +61,7 @@ Are there teams that are booked more than others?
   2022 overall
 - For the former, several teams have accumulated a high number of yellow
   cards, while for the latter Boca Juniors seems to have the excessive
-  amount fo cards
+  amount of cards
 - For red ones, Rosario Central appears to be the most aggressive one
   during the 2016-17 season while San Lorenzo repeats that trend during
   the 2021.
