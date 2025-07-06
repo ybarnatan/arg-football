@@ -38,5 +38,10 @@ Football is often referred to as "a sport of marginal effects". This means that 
 ---
 
 ## ✍️ **Author**  
-[Yair Barnatan] – [LinkedIn](https://www.linkedin.com/in/yair-barnatan/) | [GitHub](https://github.com/ybarnatan)
+
+**Yair Barnatan**
+
+[LinkedIn](https://www.linkedin.com/in/yair-barnatan/) | [GitHub](https://github.com/ybarnatan)
+
 📧 Email: ybbarnatan@gmail.com
+
