@@ -8,7 +8,7 @@ This project analyzes match data from the Argentinean football league (Primera D
 * To apply the Poisson distribution to construct a basic statistical model for predicting match outcomes.
 
 📄 For the full analysis, check the `LPF_arg.md` file.
-📈 The source code is available in the `LPF_arg.Rmd` file.
+
 
 ### 🔈 Disclaimer
 Football is often referred to as "a sport of marginal effects". This means that even strong statistical trends may not guarantee a favorable outcome. For example, a team might dominate a match in possession, expected goals, and squad value — yet still lose to a statistically weaker opponent. This unpredictability is part of what makes football both fascinating and analytically challenging.
