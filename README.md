@@ -11,7 +11,7 @@ This project analyzes match data from the Argentinean football league (Primera D
 
 ---
 
-📌 **Key Insights / Highlights**
+📌 **Key Insights**
 - 📈 Home teams scored more goals on average, confirming the **home advantage effect**.
 - 🔍 Seasonal fluctuations in team performance were visualized and analyzed.
 - ⚽ A basic **Poisson model** was implemented to estimate match result probabilities.
