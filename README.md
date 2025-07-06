@@ -23,7 +23,7 @@ This project analyzes match data from the Argentinean football league (Primera D
 - **R**  
 - **R Markdown** (`.Rmd`)  
 - Libraries for data wrangling, visualization, and statistical modeling:  
-  `dplyr`, `ggplot2`, `readr`, `lubridate`, `stats`, etc.
+  `dplyr`, `ggplot2`, `skellam`
 
 ---
 
@@ -37,6 +37,6 @@ Football is often referred to as "a sport of marginal effects". This means that 
 
 ---
 
-✍️ **Author**  
+## ✍️ **Author**  
 [Yair Barnatan] – [LinkedIn](https://www.linkedin.com/in/yair-barnatan/) | [GitHub](https://github.com/ybarnatan)
 📧 Email: ybbarnatan@gmail.com
