@@ -21,7 +21,7 @@ This project analyzes match data from the Argentinean football league (Primera D
 
 ### 💻 Stack
 - **R**  
-- **R Markdown** (`.Rmd`)  
+- **R Markdown** 
 - Libraries for data wrangling, visualization, and statistical modeling:  
   `dplyr`, `ggplot2`, `skellam`
 
